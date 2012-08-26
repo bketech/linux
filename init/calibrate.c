@@ -11,12 +11,19 @@
 #include <linux/smp.h>
 
 unsigned long lpj_fine;
+#if defined(CONFIG_MACH_MX35_IVLBOARD)
+/* Preconfiguring this saves a wee bit of boot time. */
+unsigned long preset_lpj = 2654208 * 100 / HZ;
+#else
 unsigned long preset_lpj;
+#endif
+
 static int __init lpj_setup(char *str)
 {
 	preset_lpj = simple_strtoul(str,NULL,0);
 	return 1;
 }
+
 
 __setup("lpj=", lpj_setup);
 
