@@ -46,6 +46,7 @@ config SND_SOC_ALL_CODECS
 	select SND_SOC_WM9705 if SND_SOC_AC97_BUS
 	select SND_SOC_WM9712 if SND_SOC_AC97_BUS
 	select SND_SOC_WM9713 if SND_SOC_AC97_BUS
+	select SND_SOC_BEAT_THANG if I2C
         help
           Normally ASoC codec drivers are only built if a machine driver which
           uses them is also built since they are only usable with a machine
@@ -57,6 +58,9 @@ config SND_SOC_ALL_CODECS
 
           If unsure select "N".
 
+config SND_SOC_BEAT_THANG
+	tristate
+	depends on SND_SOC
 
 config SND_SOC_AC97_CODEC
 	tristate

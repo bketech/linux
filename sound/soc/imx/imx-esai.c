@@ -35,7 +35,7 @@
 #include "imx-esai.h"
 #include "imx-pcm.h"
 
-/*#define IMX_ESAI_DUMP 1*/
+//#define IMX_ESAI_DUMP
 
 #ifdef IMX_ESAI_DUMP
 #define ESAI_DUMP() \
@@ -137,7 +137,15 @@
 #define ESAI_RFCR_RE0	(1 << 2)
 #define ESAI_RFCR_RFR	(1 << 1)
 #define ESAI_RFCR_RFEN	(1 << 0)
+
+#ifndef CONFIG_MACH_MX35_IVLBOARD
 #define ESAI_RFCR_RE(x) ((0xf >> (4 - ((x + 1) >> 1))) << 3)
+#else
+/* Freescale does not use RE0.  We do.
+ * This sets one bit for every 1-2 channels enabled.
+ */
+#define ESAI_RFCR_RE(x) ((0xf >> (4 - ((x + 1) >> 1))) << 2)
+#endif
 #define ESAI_RFCR_RE_MASK	0xfffc3
 #define ESAI_RFCR_RFWM(x)       ((x-1) << 8)
 #define ESAI_RFCR_RWA_MASK	0xf8ffff
@@ -228,8 +236,6 @@
 #define ESAI_TCCR_TCKP	(1 << 18)
 
 #define ESAI_TCCR_TPSR_MASK 0xfffeff
-#define ESAI_TCCR_TPSR_BYPASS (1 << 8)
-#define ESAI_TCCR_TPSR_DIV8 (0 << 8)
 
 #define ESAI_TCCR_TFP_MASK	0xfc3fff
 #define ESAI_TCCR_TFP(x)	((x & 0xf) << 14)
@@ -254,7 +260,13 @@
 #define ESAI_RCR_RE2	(1 << 2)
 #define ESAI_RCR_RE1	(1 << 1)
 #define ESAI_RCR_RE0	(1 << 0)
+#ifndef CONFIG_MACH_MX35_IVLBOARD
 #define ESAI_RCR_RE(x) ((0xf >> (4 - ((x + 1) >> 1))) << 1)
+#else
+/* RE(0) = 0, RE(1) = RE(2) = 0b0001, RE(3) = RE(4) = 0b0011, etc.
+ * Freescale does not use RE0, so they shift by one to skip it */
+#define ESAI_RCR_RE(x) ((0xf >> (4 - ((x + 1) >> 1))) << 0)
+#endif
 
 #define ESAI_RCR_RSWS_MASK	0xff83ff
 #define ESAI_RCR_RSWS_STL8_WDL8	(0x00 << 10)
@@ -293,8 +305,6 @@
 #define ESAI_RCCR_RCKP	(1 << 18)
 
 #define ESAI_RCCR_RPSR_MASK 0xfffeff
-#define ESAI_RCCR_RPSR_BYPASS (1 << 8)
-#define ESAI_RCCR_RPSR_DIV8 (0 << 8)
 
 #define ESAI_RCCR_RFP_MASK	0xfc3fff
 #define ESAI_RCCR_RFP(x)	((x & 0xf) << 14)
@@ -306,18 +316,6 @@
 #define ESAI_RCCR_RPM(x)	(x & 0xff)
 
 #define ESAI_GPIO_ESAI	0xfff
-
-/* ESAI clock source */
-#define ESAI_CLK_FSYS	0
-#define ESAI_CLK_EXTAL 1
-
-/* ESAI clock divider */
-#define ESAI_TX_DIV_PSR	0
-#define ESAI_TX_DIV_PM 1
-#define ESAI_TX_DIV_FP	2
-#define ESAI_RX_DIV_PSR	3
-#define ESAI_RX_DIV_PM	4
-#define ESAI_RX_DIV_FP	5
 
 static int imx_esai_txrx_state;
 static struct imx_esai imx_esai_priv[3];
@@ -341,6 +339,7 @@ static int imx_esai_set_dai_sysclk(struct snd_soc_dai *cpu_dai,
 			    ~(ESAI_RCCR_RHCKD | ESAI_RCCR_RCKD |
 			      ESAI_RCCR_RFSD);
 	} else {
+#ifndef CONFIG_MACH_MX35_IVLBOARD
 		if (cpu_dai->id & IMX_DAI_ESAI_TX)
 			tccr |=
 			    ESAI_TCCR_THCKD | ESAI_TCCR_TCKD | ESAI_TCCR_TFSD;
@@ -362,6 +361,13 @@ static int imx_esai_set_dai_sysclk(struct snd_soc_dai *cpu_dai,
 				ecr &= ~ESAI_ECR_ERO;
 			}
 		}
+#else
+		tccr |= ESAI_TCCR_THCKD | ESAI_TCCR_TCKD | ESAI_TCCR_TFSD;
+		//rccr &= ~(ESAI_RCCR_RHCKD | ESAI_RCCR_RCKD | ESAI_RCCR_RFSD);
+		rccr |= ESAI_RCCR_RHCKD | ESAI_RCCR_RCKD | ESAI_RCCR_RFSD;
+		ecr |= ESAI_ECR_ETI | ESAI_ECR_ETO;
+		ecr |= ESAI_ECR_ERI | ESAI_ECR_ERO;
+#endif
 	}
 
 	__raw_writel(ecr, ESAI_ECR);
@@ -513,6 +519,9 @@ static int imx_esai_set_dai_fmt(struct snd_soc_dai *cpu_dai, unsigned int fmt)
 		tccr |= ESAI_TCCR_TCKP | ESAI_TCCR_THCKP;
 		rccr &= ~ESAI_RCCR_RFSP;
 		rccr |= ESAI_RCCR_RCKP | ESAI_RCCR_RHCKP;
+#ifdef CONFIG_MACH_MX35_IVLBOARD
+		rccr |= ESAI_RCCR_RFSP; /* invert RX because ESAI is opposite of I2S */
+#endif
 		break;
 	}
 
@@ -691,18 +700,27 @@ static int imx_esai_hw_rx_params(struct snd_pcm_substream *substream,
 	switch (params_format(params)) {
 	case SNDRV_PCM_FORMAT_S16_LE:
 		rfcr |= ESAI_WORD_LEN_16;
-		rcr |= ESAI_RCR_RSHFD_MSB | ESAI_RCR_RSWS_STL16_WDL16;
+		rcr |= ESAI_RCR_RSHFD_MSB | ESAI_RCR_RSWS_STL32_WDL16;
+		break;
+	case SNDRV_PCM_FORMAT_S20_3LE:
+		rfcr |= ESAI_WORD_LEN_20;
+		rcr |= ESAI_RCR_RSHFD_MSB | ESAI_RCR_RSWS_STL32_WDL20;
+		break;
+	case SNDRV_PCM_FORMAT_S24_LE:
+		rfcr |= ESAI_WORD_LEN_24;
+		rcr |= ESAI_RCR_RSHFD_MSB | ESAI_RCR_RSWS_STL32_WDL24;
 		break;
 	}
 
 	channels = params_channels(params);
 	rfcr &= ESAI_RFCR_RE_MASK;
 	rfcr |= ESAI_RFCR_RE(channels);
-
 	rfcr |= ESAI_RFCR_RFWM(64);
 
 	__raw_writel(rcr, ESAI_RCR);
 	__raw_writel(rfcr, ESAI_RFCR);
+
+	ESAI_DUMP();
 	return 0;
 }
 
@@ -715,11 +733,11 @@ static int imx_esai_hw_params(struct snd_pcm_substream *substream,
 {
 	/* Tx/Rx config */
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
-		if (__raw_readl(ESAI_TCR) & ESAI_TCR_TE0)
+		if (__raw_readl(ESAI_TCR) & ESAI_TCR_TE(1))
 			return 0;
 		return imx_esai_hw_tx_params(substream, params, dai);
 	} else {
-		if (__raw_readl(ESAI_RCR) & ESAI_RCR_RE1)
+		if (__raw_readl(ESAI_RCR) & ESAI_RCR_RE(1))
 			return 0;
 		return imx_esai_hw_rx_params(substream, params, dai);
 	}
@@ -728,6 +746,7 @@ static int imx_esai_hw_params(struct snd_pcm_substream *substream,
 static int imx_esai_trigger(struct snd_pcm_substream *substream, int cmd,
 			    struct snd_soc_dai *dai)
 {
+	struct imx_esai *esai = dai->private_data;
 	u32 reg, tfcr = 0, rfcr = 0;
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
@@ -753,6 +772,19 @@ static int imx_esai_trigger(struct snd_pcm_substream *substream, int cmd,
 			reg &= ~ESAI_RCR_RPR;
 			reg |= ESAI_RCR_RE(substream->runtime->channels);
 			__raw_writel(reg, ESAI_RCR);
+
+			if (esai->sync_mode) {
+				/* Sync mode requires transmit running (out of reset) to
+				 * generate a frame clock, even if no transmit channels are
+				 * enabled.
+				 */
+				tfcr = __raw_readl(ESAI_TFCR);
+				reg = __raw_readl(ESAI_TCR);
+				tfcr |= ESAI_TFCR_TFEN;
+				__raw_writel(tfcr, ESAI_TFCR);
+				reg &= ~ESAI_TCR_TPR;
+				__raw_writel(reg, ESAI_TCR);
+			}
 		}
 		break;
 	case SNDRV_PCM_TRIGGER_SUSPEND:
@@ -778,6 +810,25 @@ static int imx_esai_trigger(struct snd_pcm_substream *substream, int cmd,
 			__raw_writel(rfcr, ESAI_RFCR);
 			rfcr &= ~ESAI_RFCR_RFR;
 			__raw_writel(rfcr, ESAI_RFCR);
+
+			if (esai->sync_mode) {
+				reg = __raw_readl(ESAI_TCR);
+				if (!(reg & ESAI_TCR_TE(1))) {
+					/* If we are in sync mode and no transmit channels are
+					 * running, turn off the portion of the transmit side
+					 * that was previously enabled.
+					 * Strictly, we only check channel #1 and assume
+					 * channels are enabled sequentially.
+					 */
+					reg |= ESAI_TCR_TPR;
+					__raw_writel(reg, ESAI_TCR);
+					tfcr |= ESAI_TFCR_TFR;
+					tfcr &= ~ESAI_TFCR_TFEN;
+					__raw_writel(tfcr, ESAI_TFCR);
+					tfcr &= ~ESAI_TFCR_TFR;
+					__raw_writel(tfcr, ESAI_TFCR);
+				}
+			}
 		}
 		break;
 	default:
@@ -791,6 +842,12 @@ static int imx_esai_trigger(struct snd_pcm_substream *substream, int cmd,
 static void imx_esai_shutdown(struct snd_pcm_substream *substream,
 			      struct snd_soc_dai *dai)
 {
+	u32 ecr, tccr;
+
+	/* IVL: Don't shut down unless both streams are off */
+	if (dai->playback.active || dai->capture.active)
+		return;
+
 	if (dai->id & IMX_DAI_ESAI_TX)
 		imx_esai_txrx_state &= ~IMX_DAI_ESAI_TX;
 	if (dai->id & IMX_DAI_ESAI_RX)
@@ -798,6 +855,16 @@ static void imx_esai_shutdown(struct snd_pcm_substream *substream,
 
 	/* shutdown ESAI if neither Tx or Rx is active */
 	if (!(imx_esai_txrx_state & IMX_DAI_ESAI_TXRX)) {
+		/* Make HCKT an input */
+		tccr = __raw_readl(ESAI_TCCR);
+		tccr &= ~(ESAI_TCCR_THCKD | ESAI_TCCR_TCKD | ESAI_TCCR_TFSD);
+		__raw_writel(tccr, ESAI_TCCR);
+
+		/* Disable ESAI */
+		ecr = __raw_readl(ESAI_ECR);
+		ecr &= ~(ESAI_ECR_ESAIEN | ESAI_ECR_ETO);
+		__raw_writel(ecr, ESAI_ECR);
+
 		free_irq(MXC_INT_ESAI, NULL);
 		clk_disable(esai_clk);
 	}
@@ -839,7 +906,6 @@ static int imx_esai_probe(struct platform_device *pdev, struct snd_soc_dai *dai)
 static void imx_esai_remove(struct platform_device *pdev,
 			    struct snd_soc_dai *dai)
 {
-
 	clk_put(esai_clk);
 }
 

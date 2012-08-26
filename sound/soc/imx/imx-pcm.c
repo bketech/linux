@@ -62,14 +62,14 @@ static const struct snd_pcm_hardware imx_pcm_hardware = {
 	.formats = SNDRV_PCM_FMTBIT_S16_LE | SNDRV_PCM_FMTBIT_S24_LE,
 #ifdef CONFIG_SND_MXC_SOC_IRAM
 	.buffer_bytes_max = SND_RAM_SIZE,
-	.period_bytes_max = SND_RAM_SIZE / 4,
+	.period_bytes_max = SND_RAM_SIZE / 2,
 #else
 	.buffer_bytes_max = 64 * 1024,
-	.period_bytes_max = 16 * 1024,
+	.period_bytes_max = 32 * 1024,
 #endif
-	.period_bytes_min = 2 * SZ_1K,
+	.period_bytes_min = 256,
 	.periods_min = 2,
-	.periods_max = 255,
+	.periods_max = 2,
 	.fifo_size = 0,
 };
 

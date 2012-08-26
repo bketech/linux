@@ -27,4 +27,22 @@ struct imx_esai {
 
 extern struct snd_soc_dai imx_esai_dai[];
 
+/* ESAI clock source */
+#define ESAI_CLK_FSYS	0
+#define ESAI_CLK_EXTAL 1
+
+/* ESAI clock divider */
+#define ESAI_TX_DIV_PSR	0
+#define ESAI_TX_DIV_PM 1
+#define ESAI_TX_DIV_FP	2
+#define ESAI_RX_DIV_PSR	3
+#define ESAI_RX_DIV_PM	4
+#define ESAI_RX_DIV_FP	5
+
+#define ESAI_TCCR_TPSR_BYPASS (1 << 8)
+#define ESAI_TCCR_TPSR_DIV8 (0 << 8)
+
+#define ESAI_RCCR_RPSR_BYPASS (1 << 8)
+#define ESAI_RCCR_RPSR_DIV8 (0 << 8)
+
 #endif

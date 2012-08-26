@@ -10,6 +10,8 @@ obj-$(CONFIG_SND_MXC_SOC_ESAI) += snd-soc-imx-esai.o
 obj-$(CONFIG_SND_MXC_SOC_AC97) += snd-soc-imx-ac97.o
 
 # i.MX Machine Support
+snd-soc-imx-ivlboard-beat-thang-objs := imx-ivlboard-beat-thang.o
+obj-$(CONFIG_SND_SOC_IMX_IVLBOARD_BEAT_THANG) += snd-soc-imx-ivlboard-beat-thang.o
 snd-soc-imx-3stack-wm8350-objs := imx-3stack-wm8350.o
 obj-$(CONFIG_SND_SOC_IMX_3STACK_WM8350) += snd-soc-imx-3stack-wm8350.o
 snd-soc-imx-3stack-sgtl5000-objs := imx-3stack-sgtl5000.o

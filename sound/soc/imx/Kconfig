@@ -23,6 +23,14 @@ config SND_MXC_SOC_IRAM
  help
    Say Y if you don't want Audio playback buffers in external ram
 
+config SND_SOC_IMX_IVLBOARD_BEAT_THANG
+ tristate "SoC Audio support for Beat Thang"
+ select SND_MXC_SOC_ESAI
+ select SND_SOC_BEAT_THANG
+ help
+   Say Y if you want to add support for SoC audio on IVL board hardware
+   with the Beat Thang codec setup.
+ 
 config SND_SOC_IMX_3STACK_WM8350
  tristate "SoC Audio support for IMX - WM8350"
  depends on MFD_WM8350
