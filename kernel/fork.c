@@ -1812,6 +1812,7 @@ void  __mmdrop_delayed(struct mm_struct *mm)
 	put_cpu_var(delayed_drop_list);
 }
 
+#ifdef CONFIG_HOTPLUG_CPU
 static void takeover_delayed_drop(int hotcpu)
 {
 	struct list_head *head = &per_cpu(delayed_drop_list, hotcpu);
@@ -1824,6 +1825,7 @@ static void takeover_delayed_drop(int hotcpu)
 		__mmdrop_delayed(mm);
 	}
 }
+#endif
 
 static int desched_thread(void * __bind_cpu)
 {

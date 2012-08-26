@@ -993,7 +993,7 @@ out_set:
 static int send_signal(int sig, struct siginfo *info, struct task_struct *t,
 			int group)
 {
-	int ret, from_ancestor_ns = 0;
+	int from_ancestor_ns = 0;
 
 #ifdef CONFIG_PID_NS
 	if (!is_si_special(info) && SI_FROMUSER(info) &&

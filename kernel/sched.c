@@ -137,7 +137,9 @@
  */
 #define RUNTIME_INF	((u64)~0ULL)
 
+#ifdef CONFIG_SMP
 static void double_rq_lock(struct rq *rq1, struct rq *rq2);
+#endif
 
 #define TASK_PREEMPTS_CURR(p, rq) \
 	((p)->prio < (rq)->curr->prio)
