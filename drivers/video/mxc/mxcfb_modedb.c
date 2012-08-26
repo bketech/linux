@@ -65,5 +65,12 @@ struct fb_videomode mxcfb_modedb[] = {
 	 0, FB_VMODE_NONINTERLACED, 0,
 	 },
 };
+EXPORT_SYMBOL_GPL(mxcfb_modedb);
 
 int mxcfb_modedb_sz = ARRAY_SIZE(mxcfb_modedb);
+EXPORT_SYMBOL_GPL(mxcfb_modedb_sz);
+
+MODULE_AUTHOR("Freescale Semiconductor, Inc.");
+MODULE_DESCRIPTION("MXC framebuffer driver");
+MODULE_LICENSE("GPL");
+

@@ -1304,6 +1304,21 @@ static void mxcuart_set_termios(struct uart_port *port,
 	 * setting. If it's still invalid, we try 9600 baud.
 	 */
 	baud = uart_get_baud_rate(&umxc->port, termios, old, 0, per_clk / 16);
+
+	/* Support custom divisor for MIDI operation */
+	if (baud == 38400) {
+		/* Custom divisor "override" 38400 baud only.  Check what our
+		 * custom divisor is and recalculate the baud rate.  Internally
+		 * the UART module's max rate is (per_clk / 16) and that is
+		 * divided down to the desired rate.  We discard the value of
+		 * div found here -- we're only interested in finding the real
+		 * target baud rate.
+		 */
+		div = uart_get_divisor(&umxc->port, baud);
+		if (div > 0)
+			baud = (per_clk / 16) / div;
+	}
+
 	/* Set the Reference frequency divider */
 	mxcuart_set_ref_freq(umxc, per_clk, baud, &div);
 

@@ -47,7 +47,7 @@ struct mxc_pf_data {
 	volatile int done_mask;
 	volatile int wait_mask;
 	volatile int busy_flag;
-	struct semaphore busy_lock;
+	struct mutex busy_lock;
 };
 
 static struct mxc_pf_data pf_data;
@@ -546,7 +546,7 @@ static int mxc_pf_open(struct inode *inode, struct file *filp)
 		pf_data.buf[i].index = -1;
 	}
 	init_waitqueue_head(&pf_data.pf_wait);
-	init_MUTEX(&pf_data.busy_lock);
+	mutex_init(&pf_data.busy_lock);
 
 	pf_data.busy_flag = 1;
 
@@ -848,7 +848,7 @@ static int mxc_pf_mmap(struct file *file, struct vm_area_struct *vma)
 		 vma->vm_pgoff, vma->vm_start, vma->vm_end);
 
 	/* make this _really_ smp-safe */
-	if (down_interruptible(&pf_data.busy_lock))
+	if (mutex_lock_interruptible(&pf_data.busy_lock))
 		return -EINTR;
 
 	/* make buffers write-thru cacheable */
@@ -865,7 +865,7 @@ static int mxc_pf_mmap(struct file *file, struct vm_area_struct *vma)
 	vma->vm_flags &= ~VM_IO;	/* using shared anonymous pages */
 
       mmap_exit:
-	up(&pf_data.busy_lock);
+	mutex_unlock(&pf_data.busy_lock);
 	return res;
 }
 
@@ -906,13 +906,13 @@ static unsigned int mxc_pf_poll(struct file *file, poll_table * wait)
 	wait_queue_head_t *queue = NULL;
 	int res = POLLIN | POLLRDNORM;
 
-	if (down_interruptible(&pf_data.busy_lock))
+	if (mutex_lock_interruptible(&pf_data.busy_lock))
 		return -EINTR;
 
 	queue = &pf_data.pf_wait;
 	poll_wait(file, queue, wait);
 
-	up(&pf_data.busy_lock);
+	mutex_unlock(&pf_data.busy_lock);
 
 	return res;
 }

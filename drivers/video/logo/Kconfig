@@ -27,6 +27,16 @@ config LOGO_LINUX_CLUT224
 	bool "Standard 224-color Linux logo"
 	default y
 
+config LOGO_BKE_CLUT224
+	bool "Beat Kangz Electronics 224-color logo"
+	depends on BOARD_BEAT_THANG
+	default y
+
+config LOGO_STANTON_CLUT224
+	bool "Stanton 224-color logo"
+	depends on BOARD_SASQUATCH
+	default y
+
 config LOGO_BLACKFIN_VGA16
 	bool "16-colour Blackfin Processor Linux logo"
 	depends on BLACKFIN

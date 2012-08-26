@@ -727,7 +727,7 @@ static int mxci2c_probe(struct platform_device *pdev)
 		goto err2;
 	}
 
-	printk(KERN_INFO "MXC I2C driver\n");
+	printk(KERN_INFO "MXC I2C driver: bus %i\n", id);
 	return 0;
 
       err2:

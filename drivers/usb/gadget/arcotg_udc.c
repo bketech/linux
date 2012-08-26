@@ -437,7 +437,15 @@ static void dr_controller_run(struct fsl_udc *udc)
 		 recognize as FS device
 		 during USB gadget remote wake up function
 		*/
+
+		/* On the other hand, the mdelay() BREAKS HS when the cable is
+		 * already inserted.  As usual a stupid delay is no substitute
+		 * for a real solution.
+		 */
+		if (udc->remote_wakeup) {
+			printk(KERN_INFO "delay\n");
 		mdelay(100);
+		}
 		/* Clear stopped bit */
 		udc->stopped = 0;
 		/* Set controller to Run */
@@ -982,24 +990,19 @@ static int fsl_req_to_dtd(struct fsl_req *req)
 	return 0;
 }
 
-/* queues (submits) an I/O request to an endpoint */
-static int
-fsl_ep_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
+static int _fsl_ep_queue_setup(struct fsl_ep *ep, struct fsl_req *req, gfp_t gfp_flags)
 {
-	struct fsl_ep *ep = container_of(_ep, struct fsl_ep, ep);
-	struct fsl_req *req = container_of(_req, struct fsl_req, req);
 	struct fsl_udc *udc;
-	unsigned long flags;
 	int is_iso = 0;
 
 	/* catch various bogus parameters */
-	if (!_req || !req->req.buf || (ep_index(ep)
-				      && !list_empty(&req->queue))) {
-		VDBG("%s, bad params\n", __func__);
+	if (!ep || !ep->desc) {
+		VDBG("%s, bad ep\n", __func__);
 		return -EINVAL;
 	}
-	if (!_ep || (!ep->desc && ep_index(ep))) {
-		VDBG("%s, bad ep\n", __func__);
+	if (!req || !req->req.buf || (ep_index(ep)
+				      && !list_empty(&req->queue))) {
+		VDBG("%s, bad params\n", __func__);
 		return -EINVAL;
 	}
 	if (ep->desc->bmAttributes == USB_ENDPOINT_XFER_ISOC) {
@@ -1039,22 +1042,49 @@ fsl_ep_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
 		req->buffer_offset = 0;
 	}
 
-	spin_lock_irqsave(&udc->lock, flags);
+	return 0;
+}
 
+static int _fsl_ep_queue_send(struct fsl_ep *ep, struct fsl_req *req, gfp_t gfp_flags)
+{
 	/* build dtds and push them to device queue */
 	if (!fsl_req_to_dtd(req)) {
 		fsl_queue_td(ep, req);
 	} else {
-		spin_unlock_irqrestore(&udc->lock, flags);
 		return -ENOMEM;
 	}
 
 	/* irq handler advances the queue */
 	if (req != NULL)
 		list_add_tail(&req->queue, &ep->queue);
-	spin_unlock_irqrestore(&udc->lock, flags);
 
 	return 0;
+}
+
+/* queues (submits) an I/O request to an endpoint */
+static int
+fsl_ep_queue(struct usb_ep *_ep, struct usb_request *_req, gfp_t gfp_flags)
+{
+	struct fsl_ep *ep = container_of(_ep, struct fsl_ep, ep);
+	struct fsl_req *req = container_of(_req, struct fsl_req, req);
+	struct fsl_udc *udc;
+	unsigned long flags;
+	int err;
+
+	if (!_ep || !_req)
+		return -EINVAL;
+
+	udc = ep->udc;
+
+	err = _fsl_ep_queue_setup(ep, req, gfp_flags);
+	if (err)
+		return err;
+
+	spin_lock_irqsave(&udc->lock, flags);
+	err = _fsl_ep_queue_send(ep, req, gfp_flags);
+	spin_unlock_irqrestore(&udc->lock, flags);
+
+	return err;
 }
 
 /* dequeues (cancels, unlinks) an I/O request from an endpoint */
@@ -1410,7 +1440,11 @@ static int ep0_prime_status(struct fsl_udc *udc, int direction)
 	req->req.length = 0;
 	req->req.status = -EINPROGRESS;
 
-	status = fsl_ep_queue(&ep->ep, &req->req, GFP_ATOMIC);
+	status = _fsl_ep_queue_setup(ep, req, GFP_ATOMIC);
+	if (status)
+		return status;
+	status = _fsl_ep_queue_send(ep, req, GFP_ATOMIC);
+
 	return status;
 }
 
@@ -1484,7 +1518,10 @@ static void ch9getstatus(struct fsl_udc *udc, u8 request_type, u16 value,
 	req->ep = ep;
 	req->req.length = 2;
 
-	status = fsl_ep_queue(&ep->ep, &req->req, GFP_ATOMIC);
+	status = _fsl_ep_queue_setup(ep, req, GFP_ATOMIC);
+	if (status == 0)
+		status = _fsl_ep_queue_send(ep, req, GFP_ATOMIC);
+
 	if (status) {
 		udc_reset_ep_queue(udc, 0);
 		ERR("Can't respond to getstatus request \n");
@@ -1606,7 +1643,9 @@ static void setup_received_irq(struct fsl_udc *udc,
 		if (udc->driver->setup(&udc->gadget,
 				&udc->local_setup_buff) < 0) {
 			/* cancel status phase */
+			spin_lock(&udc->lock);
 			udc_reset_ep_queue(udc, 0);
+			spin_unlock(&udc->lock);
 			ep0stall(udc);
 		}
 	} else {
@@ -1961,7 +2000,9 @@ static int reset_queues(struct fsl_udc *udc)
 		udc_reset_ep_queue(udc, pipe);
 
 	/* report disconnect; the driver is already quiesced */
+	spin_unlock(&udc->lock);
 	udc->driver->disconnect(&udc->gadget);
+	spin_lock(&udc->lock);
 
 	return 0;
 }
@@ -2898,7 +2939,7 @@ static int __exit fsl_udc_remove(struct platform_device *pdev)
 	struct resource *res;
 	struct fsl_usb2_platform_data *pdata = pdev->dev.platform_data;
 
-	DECLARE_COMPLETION(done);
+	DECLARE_COMPLETION_ONSTACK(done);
 
 	if (!udc_controller)
 		return -ENODEV;

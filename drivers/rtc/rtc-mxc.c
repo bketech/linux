@@ -621,7 +621,7 @@ static int mxc_rtc_probe(struct platform_device *pdev)
 		printk(KERN_ALERT "rtc : hardware module can't be enabled!\n");
 		return -EPERM;
 	}
-	printk("Real TIme clock Driver v%s \n", RTC_VERSION);
+	printk("MXC internal real-time clock driver v%s \n", RTC_VERSION);
 	return ret;
 }
 

@@ -34,8 +34,34 @@ config FB_MXC_CLAA_WVGA_SYNC_PANEL
 	tristate "CLAA WVGA Panel"
 
 config FB_MXC_CH7026
-	depends on FB_MXC_SYNC_PANEL
 	tristate "Chrontel CH7026 VGA Interface Chip"
+
+config FB_MXC_WANDISPLAY_QVGA_PANEL
+	depends on FB_MXC_SYNC_PANEL
+	bool "Wandisplay QVGA Panel (KWH035NJ11-F01)"
+	help
+		Supports Wandisplay KWH035NJ11-F01.
+
+config LCD_REVERSE_DRDY_POLARITY
+	bool
+	default n
+
+config FB_MXC_HX8238A_QVGA_PANEL
+	depends on FB_MXC_SYNC_PANEL
+	select LCD_REVERSE_DRDY_POLARITY
+	tristate "HX8238A-based QVGA Panels"
+	help
+		LCDs based on HX8238A controller chip. Includes:
+		 Powertip PH320240T
+		 Hot Display HTTK035ST12-F01
+		 Displaytronic ATM0350D3 QVGA Panel
+
+config FB_MXC_HX8238A_QVGA_PANEL_FORCE_SCREEN_FLIP
+	depends on FB_MXC_HX8238A_QVGA_PANEL
+	bool "Ensure screen is flipped in Vsync interrupt"
+	default y
+	help
+		ESD may cause the LCD panel to reset.  This hack forces the screen to stay flipped.
 
 config FB_MXC_TVOUT_CH7024
 	tristate "CH7024 TV Out Encoder"

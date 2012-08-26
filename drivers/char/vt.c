@@ -1616,7 +1616,12 @@ static void reset_terminal(struct vc_data *vc, int do_clear)
 	vc->vc_decscnm		= 0;
 	vc->vc_decom		= 0;
 	vc->vc_decawm		= 1;
+#ifdef CONFIG_MACH_MX35_IVLBOARD
+	/* Disable blinking cursor from boot logo splash screen */
+	vc->vc_deccm		= 0;
+#else
 	vc->vc_deccm		= 1;
+#endif
 	vc->vc_decim		= 0;
 
 	set_kbd(vc, decarm);

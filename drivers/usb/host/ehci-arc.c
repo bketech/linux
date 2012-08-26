@@ -113,7 +113,7 @@ int usb_hcd_fsl_probe(const struct hc_driver *driver,
 	int irq;
 	int retval;
 
-	pr_debug("initializing FSL-SOC USB Controller\n");
+	pr_debug("ehci-arc: initializing FSL-SOC USB Controller\n");
 
 	/* Need platform data for setup */
 	pdata = (struct fsl_usb2_platform_data *)pdev->dev.platform_data;
@@ -146,6 +146,13 @@ int usb_hcd_fsl_probe(const struct hc_driver *driver,
 	if (pdata->operating_mode == FSL_USB2_DR_OTG) {
 		res = otg_get_resources();
 		if (!res) {
+			/* Not actually broken because it lacks an IRQ! */
+			dev_err(&pdev->dev,
+				"The code for CONFIG_USB_OTG and CONFIG_USB_EHCI_ARC_OTG at"
+				"the same time is broken on MX35.  otg_get_resources"
+				"returns the wrong set of resources in this case.\n",
+				pdev->dev.bus_id);
+			/* Original error message */
 			dev_err(&pdev->dev,
 				"Found HC with no IRQ. Check %s setup!\n",
 				dev_name(&pdev->dev));

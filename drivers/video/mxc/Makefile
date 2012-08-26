@@ -14,6 +14,8 @@ endif
 	obj-$(CONFIG_FB_MXC_SHARP_128_PANEL)    += mxcfb_sharp_128x128.o
 endif
 obj-$(CONFIG_FB_MXC_EPSON_VGA_SYNC_PANEL)   += mxcfb_epson_vga.o
+obj-$(CONFIG_FB_MXC_WANDISPLAY_QVGA_PANEL)       += mxcfb_wandisplay_qvga.o
+obj-$(CONFIG_FB_MXC_HX8238A_QVGA_PANEL)	    += mxcfb_hx8238a_qvga.o
 obj-$(CONFIG_FB_MXC_CLAA_WVGA_SYNC_PANEL)   += mxcfb_claa_wvga.o
 obj-$(CONFIG_FB_MXC_TVOUT_CH7024)           += ch7024.o
 obj-$(CONFIG_FB_MXC_TVOUT_TVE)              += tve.o

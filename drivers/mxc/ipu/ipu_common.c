@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2009 Freescale Semiconductor, Inc. All Rights Reserved.
+ * Copyright 2005-2010 Freescale Semiconductor, Inc. All Rights Reserved.
  */
 
 /*
@@ -660,7 +660,6 @@ int32_t ipu_update_channel_offset(ipu_channel_t channel, ipu_buffer_t type,
 				uint32_t u, uint32_t v,
 				uint32_t vertical_offset, uint32_t horizontal_offset)
 {
-	uint32_t reg;
 	int ret = 0;
 	unsigned long lock_flags;
 	uint32_t dma_chan = channel_2_dma(channel, type);
@@ -1186,6 +1185,23 @@ int32_t ipu_enable_channel(ipu_channel_t channel)
 
 	spin_unlock_irqrestore(&ipu_lock, lock_flags);
 	return 0;
+}
+
+/*!
+ * This function clear buffer ready for a logical channel.
+ *
+ * @param       channel         Input parameter for the logical channel ID.
+ *
+ * @param       type            Input parameter which buffer to clear.
+ *
+ * @param       bufNum          Input parameter for which buffer number clear
+ * 				ready state.
+ *
+ */
+void ipu_clear_buffer_ready(ipu_channel_t channel, ipu_buffer_t type,
+		uint32_t bufNum)
+{
+	/*TODO*/
 }
 
 /*!

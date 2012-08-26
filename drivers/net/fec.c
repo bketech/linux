@@ -2070,10 +2070,29 @@ static struct platform_driver fec_driver = {
 	.resume  = fec_resume,
 };
 
+#ifdef CONFIG_MACH_MX35_IVLBOARD
+extern bool gpio_fec_is_chip_present(void);
+static inline bool fec_is_present(void)
+{
+	return gpio_fec_is_chip_present();
+}
+
+#else
+static inline bool fec_is_present(void)
+{
+	return true;
+}
+#endif
+
 static int __init
 fec_enet_module_init(void)
 {
 	printk(KERN_INFO "FEC Ethernet Driver\n");
+
+	if (!fec_is_present()) {
+		printk("FEC chip not found\n");
+		return 0;
+	}
 
 	return platform_driver_register(&fec_driver);
 }

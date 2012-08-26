@@ -145,6 +145,10 @@ int32_t ipu_sdc_init_panel(ipu_panel_t panel,
 	    sig.clkidle_en << DI_D3_CLK_IDLE_SHIFT;
 	__raw_writel(old_conf, DI_DISP_IF_CONF);
 
+#if defined(CONFIG_LCD_REVERSE_DRDY_POLARITY)
+        sig.enable_pol = 0; /* Hack: ensure OE signal gets correct polarity after change */
+#endif
+
 	old_conf = __raw_readl(DI_DISP_SIG_POL) & 0xE0FFFFFF;
 	old_conf |= sig.data_pol << DI_D3_DATA_POL_SHIFT |
 	    sig.clk_pol << DI_D3_CLK_POL_SHIFT |

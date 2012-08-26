@@ -148,6 +148,30 @@ config USB_EHCI_FSL_UTMI
 
 endchoice
 
+choice
+	prompt "Select transceiver for Host2 port"
+	depends on USB_EHCI_ARC_H2
+	default USB_EHCI_FSL_H2_INTERNAL if (ARCH_MX35 && !MACH_MX35_IVLBOARD) 
+	default USB_EHCI_FSL_H2_USB3315 if (ARCH_MX35 && MACH_MX35_IVLBOARD)
+	---help---
+	  Choose the transceiver to use with the Freescale USB Host2 port.
+
+config USB_EHCI_FSL_H2_INTERNAL
+	bool "Internal Host2 Full Speed transceiver"
+	depends on ARCH_MX35
+	---help---
+	  Enable support for the on-chip Full Speed transceiver.
+
+	  This is the factory default for the mx35 board and is supported on the
+	  IVL board with hardware modifications.
+
+config USB_EHCI_FSL_H2_USB3315
+	bool "SMSC USB3315"
+	depends on (ARCH_MX35 && MACH_MX35_IVLBOARD)
+	---help---
+	  Enable support for the SMSC USB3315 ULPI transceiver.
+
+endchoice
 
 config USB_EHCI_ROOT_HUB_TT
 	bool "Root Hub Transaction Translators"

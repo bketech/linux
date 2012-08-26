@@ -50,7 +50,7 @@ int usb_hcd_fsl_probe(const struct hc_driver *driver,
 	int retval;
 	unsigned int temp;
 
-	pr_debug("initializing FSL-SOC USB Controller\n");
+	pr_debug("ehci-fsl: initializing FSL-SOC USB Controller\n");
 
 	/* Need platform data for setup */
 	pdata = (struct fsl_usb2_platform_data *)pdev->dev.platform_data;

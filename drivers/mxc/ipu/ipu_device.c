@@ -46,7 +46,7 @@ static int mxc_ipu_major;
 static struct class *mxc_ipu_class;
 
 DEFINE_SPINLOCK(queue_lock);
-static DECLARE_MUTEX(user_mutex);
+static DEFINE_MUTEX(user_mutex);
 
 static wait_queue_head_t waitq;
 static int pending_events = 0;
