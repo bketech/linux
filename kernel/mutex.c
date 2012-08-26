@@ -148,6 +148,9 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,
 
 	preempt_disable();
 	mutex_acquire(&lock->dep_map, subclass, 0, ip);
+
+	DEBUG_LOCKS_WARN_ON(in_interrupt());
+
 #if defined(CONFIG_SMP) && !defined(CONFIG_DEBUG_MUTEXES) && \
     !defined(CONFIG_HAVE_DEFAULT_NO_SPIN_MUTEXES)
 	/*
@@ -249,9 +252,13 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,
 
 		/* didnt get the lock, go to sleep: */
 		spin_unlock_mutex(&lock->wait_lock, flags);
-		preempt_enable_no_resched();
-		schedule();
+
+		local_irq_disable();
+		__preempt_enable_no_resched();
+		__schedule();
 		preempt_disable();
+		local_irq_enable();
+
 		spin_lock_mutex(&lock->wait_lock, flags);
 	}
 
