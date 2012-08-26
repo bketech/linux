@@ -2074,7 +2074,7 @@ static void slab_destroy_debugcheck(struct kmem_cache *cachep, struct slab *slab
 }
 #endif
 
-static void
+static inline void
 __cache_free(struct kmem_cache *cachep, void *objp, int *this_cpu);
 
 
