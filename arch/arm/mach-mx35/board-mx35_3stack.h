@@ -190,8 +190,6 @@ extern void gpio_tsc_active(void);
 extern void gpio_tsc_inactive(void);
 extern unsigned int sdhc_get_card_det_status(struct device *dev);
 extern int sdhc_write_protect(struct device *dev);
-extern void gpio_can_active(int id);
-extern void gpio_can_inactive(int id);
 extern struct flexcan_platform_data flexcan_data[];
 extern int __init mx35_3stack_init_mc13892(void);
 extern int __init mx35_3stack_init_mc9s08dz60(void);

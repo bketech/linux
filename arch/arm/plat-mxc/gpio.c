@@ -400,6 +400,30 @@ static struct sys_device mxc_gpio_device = {
 	.cls = &mxc_gpio_sysclass,
 };
 
+#ifdef CONFIG_MACH_MX35_IVLBOARD
+
+extern int gpio_bist_mode_access(void);
+
+static ssize_t gpio_bist_show(struct sys_device *dev,
+		struct sysdev_attribute *attr, char *buf)
+{
+	return snprintf(buf, PAGE_SIZE, "%i\n", gpio_bist_mode_access());
+}
+
+static SYSDEV_ATTR(bist, S_IRUGO, gpio_bist_show, NULL);
+
+#endif
+
+/*!
+ * This function registers GPIO hardware as a system device and
+ * intializes all the GPIO ports if not already done.
+ * System devices will only be suspended with interrupts disabled, and
+ * after all other devices have been suspended. On resume, they will be
+ * resumed before any other devices, and also with interrupts disabled.
+ * This may get called early from board specific init
+ *
+ * @return       This function returns 0 on success.
+ */
 int __init mxc_gpio_init(struct mxc_gpio_port *port, int cnt)
 {
 	int i, j;
@@ -450,8 +474,19 @@ int __init mxc_gpio_init(struct mxc_gpio_port *port, int cnt)
 #endif
 
 	ret = sysdev_class_register(&mxc_gpio_sysclass);
-	if (ret == 0)
-		ret = sysdev_register(&mxc_gpio_device);
+	if (ret)
+		return ret;
 
+		ret = sysdev_register(&mxc_gpio_device);
+	if (ret)
+		return ret;
+
+#ifdef CONFIG_MACH_MX35_IVLBOARD
+	ret = sysdev_create_file(&mxc_gpio_device, &attr_bist);
+	if (ret)
 	return ret;
+#endif
+
+	return 0;
 }
+

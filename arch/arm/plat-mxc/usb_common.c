@@ -72,8 +72,32 @@ enum fsl_usb2_modes get_usb_mode(struct fsl_usb2_platform_data *pdata)
 static struct clk *usb_clk;
 static struct clk *usb_ahb_clk;
 
+#ifdef CONFIG_MACH_MX35_IVLBOARD
+int gpio_usbotg_hs_active(void) { return 0; }
+int gpio_usbotg_hs_inactive(void) { return 0; }
+#else
 extern int gpio_usbotg_hs_active(void);
 extern int gpio_usbotg_hs_inactive(void);
+#endif
+extern int gpio_usbh2_active(void);
+extern void gpio_usbh2_setback_stp(void);
+extern void gpio_usbh2_inactive(void);
+
+#ifdef CONFIG_MACH_MX35_IVLBOARD
+static bool usb_otg_use_external_divider(void)
+{
+	extern int ivl_carrier_revision;
+	if (ivl_carrier_revision == 'B')
+		return false;
+
+	return true;
+}
+#else
+static bool usb_otg_use_external_divider(void)
+{
+	return false;
+}
+#endif
 
 /*
  * make sure USB_CLK is running at 60 MHz +/- 1000 Hz
@@ -150,7 +174,8 @@ static struct fsl_xcvr_ops *fsl_usb_get_xcvr(char *name)
 	}
 
 	for (i = 0; i < MXC_NUMBER_USB_TRANSCEIVER; i++) {
-		if (strcmp(g_xc_ops[i]->name, name) == 0) {
+		if (g_xc_ops[i] && g_xc_ops[i]->name
+				&& strcmp(g_xc_ops[i]->name, name) == 0) {
 			return g_xc_ops[i];
 		}
 	}
@@ -274,6 +299,46 @@ static void usbh1_set_serial_xcvr(void)
 		   UCTRL_H1PM;			/* power mask */
 }
 
+static void usbh_mx35_set_ulpi_xcvr(void)
+{
+	pr_debug("%s: \n", __func__);
+
+	/* Stop then Reset */
+	UH2_USBCMD &= ~UCMD_RUN_STOP;
+	while (UH2_USBCMD & UCMD_RUN_STOP) ;
+
+	UH2_USBCMD |= UCMD_RESET;
+	while (UH2_USBCMD & UCMD_RESET) ;
+
+	/* Select the clock from external PHY */
+	//USB_CTRL_1 |= USB_CTRL_UH1_EXT_CLK_EN;
+#define UCTRL_HEXTEN (1<<26)
+	USBCTRL |= UCTRL_HEXTEN;	/* Host external ULPI clock enable */
+
+	/* select ULPI PHY PTS=2 */
+	UH2_PORTSC1 = (UH2_PORTSC1 & ~PORTSC_PTS_MASK) | PORTSC_PTS_ULPI;
+
+	USBCTRL |= UCTRL_H2WIE; /* HOST wakeup intr enable */
+	USBCTRL |= UCTRL_H2UIE; /* Host ULPI interrupt enable */
+	USBCTRL |= UCTRL_H2PM; /* HOST power mask */
+	USBCTRL |= UCTRL_H2DT; /* Host serial TLL disable */
+
+	/* Interrupt Threshold Control:Immediate (no threshold) */
+	UH2_USBCMD &= UCMD_ITC_NO_THRESHOLD;
+
+	UH2_USBCMD |= UCMD_RESET;       /* reset the controller */
+
+	/* allow controller to reset, and leave time for
+	* the ULPI transceiver to reset too.
+	*/
+	msleep(100);
+
+	/* Turn off the usbpll for ulpi tranceivers */
+	clk_disable(usb_clk);
+}
+
+
+static void usbh1_set_ulpi_xcvr(void) __maybe_unused;
 static void usbh1_set_ulpi_xcvr(void)
 {
 	pr_debug("%s: \n", __func__);
@@ -309,11 +374,20 @@ static void usbh1_set_ulpi_xcvr(void)
 	/* Turn off the usbpll for ulpi tranceivers */
 	clk_disable(usb_clk);
 }
+
+static void usbh2_set_ulpi_xcvr(void) __maybe_unused;
 static void usbh2_set_ulpi_xcvr(void)
 {
 	u32 tmp;
 
+	if (is_ivlboard()) {
+		usbh_mx35_set_ulpi_xcvr();
+		gpio_usbh2_setback_stp();
+		return;
+	}
+
 	pr_debug("%s\n", __func__);
+
 	USBCTRL &= ~(UCTRL_H2SIC_MASK | UCTRL_BPE);
 	USBCTRL |= UCTRL_H2WIE |	/* wakeup intr enable */
 		   UCTRL_H2UIE |	/* ULPI intr enable */
@@ -492,14 +566,23 @@ int fsl_usb_host_init(struct platform_device *pdev)
 #endif
 			}
 		}
+#ifndef CONFIG_MACH_MX35_IVLBOARD
 		if (!strcmp("Host 2", pdata->name)) {
 			usbh2_set_ulpi_xcvr();
 			if (cpu_is_mx51()) {
-#ifdef CONFIG_USB_EHCI_ARC_H2
+# ifdef CONFIG_USB_EHCI_ARC_H2
 				gpio_usbh2_setback_stp();
-#endif
+# endif
 			}
+			}
+#else
+		if (!strcmp("Host 2", pdata->name) && is_ivlboard()) {
+			usbh_mx35_set_ulpi_xcvr();
+			gpio_usbh2_setback_stp();
+		} else {
+			usbh2_set_ulpi_xcvr();
 		}
+#endif
 	}
 
 	pr_debug("%s: %s success\n", __func__, pdata->name);
@@ -630,7 +713,7 @@ static void otg_set_ulpi_xcvr(void)
 	/* allow controller to reset, and leave time for
 	 * the ULPI transceiver to reset too.
 	 */
-	msleep(100);
+	msleep(10);
 
 	/* Turn off the usbpll for ulpi tranceivers */
 	clk_disable(usb_clk);
@@ -638,24 +721,37 @@ static void otg_set_ulpi_xcvr(void)
 
 int fsl_usb_xcvr_suspend(struct fsl_xcvr_ops *xcvr_ops)
 {
+#if 0
 	if (!machine_is_mx31_3ds())
 		return -ECANCELED;
-
+#endif
 	if (xcvr_ops->xcvr_type == PORTSC_PTS_ULPI) {
 		if (fsl_check_usbclk() != 0)
 			return -EINVAL;
-		if (gpio_usbotg_hs_active())
+
+		if (strcmp(xcvr_ops->name, "usb3315") == 0) {
+			if (gpio_usbh2_active())
 			return -EINVAL;
+
 		clk_enable(usb_clk);
+			usbh2_set_ulpi_xcvr();
+			if (xcvr_ops->suspend)
+				xcvr_ops->suspend(xcvr_ops);
+			gpio_usbh2_inactive();
+			clk_disable(usb_clk);
+		} else {
+			if (gpio_usbotg_hs_active())
+				return -EINVAL;
 
+			clk_enable(usb_clk);
 		otg_set_ulpi_xcvr();
-
 		if (xcvr_ops->suspend)
 			/* suspend transceiver */
 			xcvr_ops->suspend(xcvr_ops);
 
 		gpio_usbotg_hs_inactive();
 		clk_disable(usb_clk);
+	}
 	}
 	return 0;
 }
@@ -727,6 +823,8 @@ static void otg_set_utmi_xcvr(void)
 	if (cpu_is_mx35() || cpu_is_mx25()) {
 		/* Enable UTMI interface in PHY control Reg */
 		USB_PHY_CTR_FUNC &= ~USB_UTMI_PHYCTRL_UTMI_ENABLE;
+		if (usb_otg_use_external_divider())
+			USB_PHY_CTR_FUNC |= USB_UTMI_PHYCTRL_EVDO_ENABLE;
 		USB_PHY_CTR_FUNC |= USB_UTMI_PHYCTRL_UTMI_ENABLE;
 	}
 
@@ -848,6 +946,8 @@ int usb_host_wakeup_irq(struct device *wkup_dev)
 
 	if (!strcmp("Host 1", pdata->name)) {
 		wakeup_req = USBCTRL & UCTRL_H1WIR;
+	} else if (!strcmp("Host 2", pdata->name)) {
+		wakeup_req = USBCTRL & UCTRL_H2WIR;
 	} else if (!strcmp("DR", pdata->name)) {
 		wakeup_req = USBCTRL & UCTRL_OWIR;
 		/* If DR is in device mode, let udc handle it */

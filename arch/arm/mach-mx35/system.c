@@ -67,7 +67,7 @@ void mxc_cpu_lp_set(enum mxc_cpu_pwr_mode mode)
 		lpm = MX35_STOP_MODE;
 		/* Enabled Well Bias */
 		reg |= MXC_CCM_CCMR_WBEN;
-		if (!board_is_rev(BOARD_REV_1))
+		if (!is_ivlboard() && !board_is_mx35(BOARD_REV_1))
 			reg |= MXC_CCM_CCMR_VSTBY;
 		break;
 

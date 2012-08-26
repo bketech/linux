@@ -248,6 +248,12 @@ struct mxc_audio_platform_data {
 	void *priv;		/* used by board specific functions */
 };
 
+struct mxc_btaudio_platform_data {
+	int hp_irq[2];
+	int line_in_irq;
+	int mic_in_irq;
+};
+
 struct mxc_spdif_platform_data {
 	int spdif_tx;
 	int spdif_rx;

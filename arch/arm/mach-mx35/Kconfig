@@ -19,7 +19,7 @@ config MX35_OPTIONS
 
 config MACH_MX35_3DS
 	bool "Support MX35 3STACK platforms"
-	default y
+	default n
 	select MXC_PSEUDO_IRQS if MXC_PMIC_MC9SDZ60
 	help
 	  Include support for MX35 3STACK platform. This includes specific
@@ -31,6 +31,25 @@ config MACH_MX35EVB
 	help
 	  Include support for MX35EVB platform. This includes specific
 	  configurations for the board and its peripherals.
+
+config MACH_MX35_IVLBOARD
+	bool "Support IVL MX35 platform"
+	default y
+	select REGULATOR_IVLBOARD
+	help
+	  Include support for MX35 IVL platform. This includes specific
+	  configurations for the board and its peripherals.
+
+choice
+	prompt "IVL board type"
+	depends on MACH_MX35_IVLBOARD
+
+config BOARD_BEAT_THANG
+	bool "Beat Thang"
+	help
+	  Include support for Beat Thang carrier board and UI board.
+	  
+endchoice
 
 config MX35_DOZE_DURING_IDLE
 	bool "Enter Doze mode during idle"

@@ -22,7 +22,7 @@ endif
 
 obj-$(CONFIG_ARCH_MX27) += dma_mx2.o usb_common.o
 obj-$(CONFIG_ARCH_MX3) += dptc.o usb_common.o entry-pm.o
-obj-$(CONFIG_ARCH_MX35) += usb_common.o serialxc.o
+obj-$(CONFIG_ARCH_MX35) += usb_common.o
 obj-$(CONFIG_ARCH_MX37) += usb_common.o utmixc.o dptc.o dvfs_core.o
 obj-$(CONFIG_ARCH_MX51) += usb_common.o utmixc.o dvfs_core.o
 
@@ -36,7 +36,9 @@ obj-$(CONFIG_CPU_FREQ_IMX)    += cpufreq.o
 obj-$(CONFIG_MXC_DVFS_PER) 	+= dvfs_per.o
 
 # USB support
+obj-$(CONFIG_USBH2_SERIAL_MXC) += serialxc.o
 obj-$(CONFIG_ISP1504_MXC) += isp1504xc.o
+obj-$(CONFIG_USB3315_MXC) += usb3315xc.o
 obj-$(CONFIG_ISP1301_MXC) += isp1301xc.o
 obj-$(CONFIG_MC13783_MXC) += mc13783_xc.o
 

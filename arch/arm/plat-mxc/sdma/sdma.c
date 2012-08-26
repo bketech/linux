@@ -1224,10 +1224,10 @@ static void __init init_mutexes(void)
 	int i;
 
 	for (i = 0; i < MAX_DMA_CHANNELS; i++) {
-		init_MUTEX(&sdma_synch_mutex[i]);
+		semaphore_init(&sdma_synch_mutex[i]);
 	}
 
-	init_MUTEX(&sdma_status_mutex);
+	semaphore_init(&sdma_status_mutex);
 }
 
 /*!
@@ -1406,7 +1406,6 @@ int __init sdma_init(void)
 	init_sdma_pool();
 
 	res = request_irq(MXC_INT_SDMA, sdma_int_handler, 0, "mxcsdma", 0);
-
 	if (res < 0) {
 		goto sdma_init_fail;
 	}

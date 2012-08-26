@@ -50,6 +50,15 @@
 #ifdef CONFIG_ARCH_MX35
 #include <mach/mx3x.h>
 #include <mach/mx35.h>
+#define board_is_mx35(rev)   ((system_rev & rev) ? 1 : 0)
+# ifdef CONFIG_MACH_MX35_IVLBOARD
+#  define is_ivlboard()	(1)
+#  ifndef __ASSEMBLY__
+extern int ivl_board_revision;
+#  endif
+# else
+#  define is_ivlboard()	(0)
+# endif
 #endif
 
 #ifdef CONFIG_ARCH_MX2

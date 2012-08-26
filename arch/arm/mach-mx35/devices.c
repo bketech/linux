@@ -27,6 +27,7 @@
 #include "sdma_script_code.h"
 #include "sdma_script_code_v2.h"
 #include "board-mx35_3stack.h"
+#include "board-mx35_ivlboard.h"
 
 void mxc_sdma_get_script_info(sdma_script_start_addrs * sdma_script_addr)
 {
@@ -396,6 +397,7 @@ static struct mxc_i2c_platform_data mxci2c1_data = {
 /*!
  * Resource definition for the I2C2
  */
+#ifdef CONFIG_I2C_MXC_SELECT2
 static struct resource mxci2c2_resources[] = {
 	[0] = {
 	       .start = I2C2_BASE_ADDR,
@@ -413,6 +415,7 @@ static struct resource mxci2c2_resources[] = {
 static struct mxc_i2c_platform_data mxci2c2_data = {
 	.i2c_clk = 100000,
 };
+#endif
 
 #ifdef CONFIG_I2C_MXC_SELECT3
 /*!
@@ -450,8 +453,9 @@ static struct platform_device mxci2c_devices[] = {
 	 .num_resources = ARRAY_SIZE(mxci2c1_resources),
 	 .resource = mxci2c1_resources,},
 #endif
+#ifdef CONFIG_I2C_MXC_SELECT2
 	{
-	 .name = "mxc_i2c_slave",
+	 .name = "mxc_i2c",
 	 .id = 1,
 	 .dev = {
 		 .release = mxc_nop_release,
@@ -459,6 +463,7 @@ static struct platform_device mxci2c_devices[] = {
 		 },
 	 .num_resources = ARRAY_SIZE(mxci2c2_resources),
 	 .resource = mxci2c2_resources,},
+#endif
 #ifdef CONFIG_I2C_MXC_SELECT3
 	{
 	 .name = "mxc_i2c",

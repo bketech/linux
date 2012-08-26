@@ -14,7 +14,11 @@
 #define __ARCH_ARM_MACH_MX35_CRM_REGS_H__
 
 #define CKIH_CLK_FREQ           24000000
+#ifdef CONFIG_MACH_MX35_IVLBOARD
+#define CKIE_CLK_FREQ		16934400
+#else
 #define CKIE_CLK_FREQ		24576000
+#endif
 #define CKIL_CLK_FREQ           32000
 #define CKIL_EXT_FREQ		32768
 

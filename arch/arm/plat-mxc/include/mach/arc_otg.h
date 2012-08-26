@@ -327,6 +327,8 @@
 #define USB_UTMI_PHYCTRL_OC_POL	(1 << 9)	/* OTG Polarity of Overcurrent */
 #define USB_UTMI_PHYCTRL_OC_DIS	(1 << 8)	/* OTG Disable Overcurrent Event */
 #define USB_UH1_OC_DIS	(1 << 5)		/* UH1 Disable Overcurrent Event */
+#define USB_UTMI_PHYCTRL_EVDO_ENABLE (1 << 23)
+
 /* USB_PHY_CTRL_FUNC2*/
 #define USB_UTMI_PHYCTRL2_PLLDIV_MASK		0x3
 #define USB_UTMI_PHYCTRL2_PLLDIV_SHIFT		0

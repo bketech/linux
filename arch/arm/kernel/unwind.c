@@ -71,7 +71,7 @@ enum regs {
 extern struct unwind_idx __start_unwind_idx[];
 extern struct unwind_idx __stop_unwind_idx[];
 
-static DEFINE_SPINLOCK(unwind_lock);
+static DEFINE_ATOMIC_SPINLOCK(unwind_lock);
 static LIST_HEAD(unwind_tables);
 
 /* Convert a prel31 symbol to an absolute address */
@@ -125,7 +125,7 @@ static struct unwind_idx *unwind_find_idx(unsigned long addr)
 		/* module unwind tables */
 		struct unwind_table *table;
 
-		spin_lock_irqsave(&unwind_lock, flags);
+		atomic_spin_lock_irqsave(&unwind_lock, flags);
 		list_for_each_entry(table, &unwind_tables, list) {
 			if (addr >= table->begin_addr &&
 			    addr < table->end_addr) {
@@ -134,7 +134,7 @@ static struct unwind_idx *unwind_find_idx(unsigned long addr)
 				break;
 			}
 		}
-		spin_unlock_irqrestore(&unwind_lock, flags);
+		atomic_spin_unlock_irqrestore(&unwind_lock, flags);
 	}
 
 	pr_debug("%s: idx = %p\n", __func__, idx);
@@ -398,9 +398,9 @@ struct unwind_table *unwind_table_add(unsigned long start, unsigned long size,
 	for (idx = tab->start; idx < tab->stop; idx++)
 		idx->addr = prel31_to_addr(&idx->addr);
 
-	spin_lock_irqsave(&unwind_lock, flags);
+	atomic_spin_lock_irqsave(&unwind_lock, flags);
 	list_add_tail(&tab->list, &unwind_tables);
-	spin_unlock_irqrestore(&unwind_lock, flags);
+	atomic_spin_unlock_irqrestore(&unwind_lock, flags);
 
 	return tab;
 }
@@ -412,9 +412,9 @@ void unwind_table_del(struct unwind_table *tab)
 	if (!tab)
 		return;
 
-	spin_lock_irqsave(&unwind_lock, flags);
+	atomic_spin_lock_irqsave(&unwind_lock, flags);
 	list_del(&tab->list);
-	spin_unlock_irqrestore(&unwind_lock, flags);
+	atomic_spin_unlock_irqrestore(&unwind_lock, flags);
 
 	kfree(tab);
 }

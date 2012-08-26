@@ -34,19 +34,19 @@
 
 static void __iomem *l2x0_base;
 static unsigned long l2x0_aux;
-static DEFINE_SPINLOCK(l2x0_lock);
+static DEFINE_ATOMIC_SPINLOCK(l2x0_lock);
 
 static inline void sync_writel(unsigned long val, unsigned long reg,
 			       unsigned long complete_mask)
 {
 	unsigned long flags;
 
-	spin_lock_irqsave(&l2x0_lock, flags);
+	atomic_spin_lock_irqsave(&l2x0_lock, flags);
 	writel(val, l2x0_base + reg);
 	/* wait for the operation to complete */
 	while (readl(l2x0_base + reg) & complete_mask)
 		;
-	spin_unlock_irqrestore(&l2x0_lock, flags);
+	atomic_spin_unlock_irqrestore(&l2x0_lock, flags);
 }
 
 static inline void cache_sync(void)

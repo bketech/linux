@@ -25,6 +25,7 @@
 #include <mach/spba.h>
 #include "serial.h"
 #include "board-mx35_3stack.h"
+#include "board-mx35_ivlboard.h"
 
 #if defined(CONFIG_SERIAL_MXC) || defined(CONFIG_SERIAL_MXC_MODULE)
 

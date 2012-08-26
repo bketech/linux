@@ -21,7 +21,7 @@
 #include <mach/arc_otg.h>
 #include "usb.h"
 
-static struct fsl_usb2_platform_data usbh2_config = {
+static struct fsl_usb2_platform_data usbh2_phy_config = {
 	.name              = "Host 2",
 	.platform_init     = fsl_usb_host_init,
 	.platform_uninit   = fsl_usb_host_uninit,
@@ -32,6 +32,31 @@ static struct fsl_usb2_platform_data usbh2_config = {
 	.gpio_usb_inactive = gpio_usbh2_inactive,
 	.transceiver       = "serial",
 };
+
+static struct fsl_usb2_platform_data usbh2_usb3315_config = {
+	.name              = "Host 2",
+	.platform_init     = fsl_usb_host_init,
+	.platform_uninit   = fsl_usb_host_uninit,
+	.operating_mode    = FSL_USB2_MPH_HOST,
+	.phy_mode          = FSL_USB2_PHY_ULPI,
+	.power_budget      = 500,		/* 500 mA max power */
+	.gpio_usb_active   = gpio_usbh2_active,
+	.gpio_usb_inactive = gpio_usbh2_inactive,
+	.transceiver       = "usb3315",
+};
+
+#ifdef CONFIG_USB3315_MXC
+extern bool gpio_fec_is_chip_present(void);
+static inline bool using_usb3315(void)
+{
+	return !gpio_fec_is_chip_present();
+}
+#else
+static inline bool using_usb3315(void)
+{
+	return false;
+}
+#endif
 
 static struct resource usbh2_resources[] = {
 	[0] = {
@@ -48,16 +73,23 @@ static struct resource usbh2_resources[] = {
 
 static int __init usbh2_init(void)
 {
+	struct fsl_usb2_platform_data *usbh2_config;
+
 	pr_debug("%s: \n", __func__);
+
+	if (using_usb3315())
+		usbh2_config = &usbh2_usb3315_config;
+	else
+		usbh2_config = &usbh2_phy_config;
 
 	/* i.MX35 1.0 should work in INCR mode */
 	if (cpu_is_mx35_rev(CHIP_REV_2_0) < 0) {
-		usbh2_config.change_ahb_burst = 1;
-		usbh2_config.ahb_burst_mode = 0;
+		usbh2_config->change_ahb_burst = 1;
+		usbh2_config->ahb_burst_mode = 0;
 	}
 
 	host_pdev_register(usbh2_resources, ARRAY_SIZE(usbh2_resources),
-			   &usbh2_config);
+			   usbh2_config);
 	return 0;
 }
 module_init(usbh2_init);

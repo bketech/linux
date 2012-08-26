@@ -16,12 +16,14 @@
 #include <linux/delay.h>
 #include <linux/clk.h>
 #include <linux/io.h>
+#include <linux/timer.h>
 #include <mach/common.h>
 #include <mach/hardware.h>
 #include <mach/clock.h>
 #include <asm/div64.h>
 
 #include "crm_regs.h"
+#include "board-mx35_ivlboard.h"
 
 #define PRE_DIV_MIN_FREQ    10000000	/* Minimum Frequency after Predivider */
 #define PROPAGATE_RATE_DIS  2
@@ -1911,6 +1913,12 @@ int __init mx35_clocks_init(void)
 	/* Determine which high frequency clock source is coming in */
 	cpu_wp_tbl = get_cpu_wp(&cpu_wp_nr);
 	sync_cpu_wb();
+
+	/* PCB0417 has a 22 MHz audio crystal.  Early versions of PCB0423 also have
+	 * it, but required it to be swapped for the 16 MHz crystal.
+	 */
+	if (ivl_board_revision == IVL_PCB0417_A)
+		ckie_clk.rate = 22579200;
 
 	/* This will propagate to all children and init all the clock rates */
 	propagate_rate(&ckih_clk);

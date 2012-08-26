@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2009 Freescale Semiconductor, Inc. All Rights Reserved.
+ * Copyright 2008-2010 Freescale Semiconductor, Inc. All Rights Reserved.
  */
 
 /*
@@ -89,7 +89,7 @@
 #endif
 
 #ifdef CONFIG_MXC_VPU_IRAM
-#define VPU_IRAM_SIZE  0x7000
+#define VPU_IRAM_SIZE  0x11000
 #else
 #define VPU_IRAM_SIZE 0
 #endif
@@ -115,7 +115,8 @@
 /*
  * Graphics Memory of GPU
  */
-#define GPU_BASE_ADDR			0x20000000
+#define GPU_GMEM_BASE_ADDR	0x20000000
+#define GPU_BASE_ADDR			0x30000000
 #define GPU2D_BASE_ADDR			0xD0000000
 
 #define TZIC_BASE_ADDR		0x8FFFC000

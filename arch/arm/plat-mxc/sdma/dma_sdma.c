@@ -245,7 +245,7 @@ static void mxc_dma_chnl_callback(void *arg)
 	priv = (int)arg;
 	data_priv = mxc_sdma_channels[priv].private;
 	/* Process the buffers in a tasklet */
-	tasklet_schedule(&data_priv->chnl_tasklet);
+	tasklet_hi_schedule(&data_priv->chnl_tasklet);
 }
 
 /*!
