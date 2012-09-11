@@ -902,7 +902,7 @@ static mxc_sdma_channel_params_t mxc_sdma_esai_16bit_rx_params = {
 			.word_size = TRANSFER_16BIT,
 			},
 	.channel_num = MXC_DMA_CHANNEL_ESAI_RX,
-	.chnl_priority = MXC_SDMA_DEFAULT_PRIORITY,
+	.chnl_priority = 2,
 };
 
 static mxc_sdma_channel_params_t mxc_sdma_esai_16bit_tx_params = {
@@ -916,7 +916,7 @@ static mxc_sdma_channel_params_t mxc_sdma_esai_16bit_tx_params = {
 			.word_size = TRANSFER_16BIT,
 			},
 	.channel_num = MXC_DMA_CHANNEL_ESAI_TX,
-	.chnl_priority = MXC_SDMA_DEFAULT_PRIORITY,
+	.chnl_priority = 2,
 };
 
 static mxc_sdma_channel_params_t mxc_sdma_esai_24bit_rx_params = {
@@ -930,7 +930,7 @@ static mxc_sdma_channel_params_t mxc_sdma_esai_24bit_rx_params = {
 			.word_size = TRANSFER_32BIT,
 			},
 	.channel_num = MXC_DMA_CHANNEL_ESAI_RX,
-	.chnl_priority = MXC_SDMA_DEFAULT_PRIORITY,
+	.chnl_priority = 2,
 };
 
 static mxc_sdma_channel_params_t mxc_sdma_esai_24bit_tx_params = {
@@ -944,7 +944,7 @@ static mxc_sdma_channel_params_t mxc_sdma_esai_24bit_tx_params = {
 			.word_size = TRANSFER_32BIT,
 			},
 	.channel_num = MXC_DMA_CHANNEL_ESAI_TX,
-	.chnl_priority = MXC_SDMA_DEFAULT_PRIORITY,
+	.chnl_priority = 2,
 };
 
 static struct mxc_sdma_info_entry_s mxc_sdma_active_dma_info[] = {
