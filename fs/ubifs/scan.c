@@ -337,8 +337,8 @@ struct ubifs_scan_leb *ubifs_scan(const struct ubifs_info *c, int lnum,
 	for (; len; offs++, buf++, len--)
 		if (*(uint8_t *)buf != 0xff) {
 			if (!quiet)
-			ubifs_err("corrupt empty space at LEB %d:%d",
-				  lnum, offs);
+				ubifs_err("corrupt empty space at LEB %d:%d",
+					  lnum, offs);
 			goto corrupted;
 		}
 
@@ -346,7 +346,7 @@ struct ubifs_scan_leb *ubifs_scan(const struct ubifs_info *c, int lnum,
 
 corrupted:
 	if (!quiet) {
-	ubifs_scanned_corruption(c, lnum, offs, buf);
+		ubifs_scanned_corruption(c, lnum, offs, buf);
 		ubifs_err("LEB %d scanning failed", lnum);
 	}
 	err = -EUCLEAN;

@@ -264,7 +264,7 @@ int ubifs_read_master(struct ubifs_info *c)
 	err = scan_for_master(c);
 	if (err) {
 		if (err == -EUCLEAN)
-		err = ubifs_recover_master_node(c);
+			err = ubifs_recover_master_node(c);
 		if (err)
 			/*
 			 * Note, we do not free 'c->mst_node' here because the

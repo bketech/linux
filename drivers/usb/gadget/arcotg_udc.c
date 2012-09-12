@@ -444,7 +444,7 @@ static void dr_controller_run(struct fsl_udc *udc)
 		 */
 		if (udc->remote_wakeup) {
 			printk(KERN_INFO "delay\n");
-		mdelay(100);
+			mdelay(100);
 		}
 		/* Clear stopped bit */
 		udc->stopped = 0;

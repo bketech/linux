@@ -522,7 +522,7 @@ static int nor_erase_prepare(struct ubi_device *ubi, int pnum)
 		 * PEB and not afraid that it will be treated as a valid PEB in
 		 * case of an unclean reboot.
 		 */
-	return 0;
+		return 0;
 
 	/*
 	 * The PEB contains a valid VID header, but we cannot invalidate it.

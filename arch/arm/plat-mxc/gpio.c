@@ -477,14 +477,14 @@ int __init mxc_gpio_init(struct mxc_gpio_port *port, int cnt)
 	if (ret)
 		return ret;
 
-		ret = sysdev_register(&mxc_gpio_device);
+	ret = sysdev_register(&mxc_gpio_device);
 	if (ret)
 		return ret;
 
 #ifdef CONFIG_MACH_MX35_IVLBOARD
 	ret = sysdev_create_file(&mxc_gpio_device, &attr_bist);
 	if (ret)
-	return ret;
+		return ret;
 #endif
 
 	return 0;

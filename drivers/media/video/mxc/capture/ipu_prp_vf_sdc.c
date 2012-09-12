@@ -83,7 +83,7 @@ static int prpvf_start(void *private)
 		fbvar.nonstd = vf_out_format;
 	} else {
 		vf_out_format = IPU_PIX_FMT_RGB565;
-	fbvar.nonstd = 0;
+		fbvar.nonstd = 0;
 	}
 
 	fbvar.bits_per_pixel = 16;

@@ -303,7 +303,7 @@ static void timer_work_func(struct work_struct *work)
 	if ((g_buf_output_cnt == 0) && vout->ic_bypass) {
 		wait_for_disp_vsync(vout);
 		wait_for_disp_vsync(vout);
-	spin_lock_irqsave(&g_lock, lock_flags);
+		spin_lock_irqsave(&g_lock, lock_flags);
 		last_buf = vout->ipu_buf[0];
 		vout->v4l2_bufs[last_buf].flags = V4L2_BUF_FLAG_DONE;
 		queue_buf(&vout->done_q, last_buf);
@@ -347,28 +347,28 @@ static void timer_work_func(struct work_struct *work)
 	}
 
 	if (vout->ic_bypass)
-			ret = ipu_select_buffer(vout->display_ch, IPU_INPUT_BUFFER,
-					  vout->next_rdy_ipu_buf);
+		ret = ipu_select_buffer(vout->display_ch, IPU_INPUT_BUFFER,
+				vout->next_rdy_ipu_buf);
 	else if (LOAD_3FIELDS(vout))
-				ret = ipu_select_multi_vdi_buffer(vout->next_rdy_ipu_buf);
+		ret = ipu_select_multi_vdi_buffer(vout->next_rdy_ipu_buf);
 	else
-				ret = ipu_select_buffer(vout->post_proc_ch, IPU_INPUT_BUFFER,
-							vout->next_rdy_ipu_buf);
-		if (ret < 0) {
-			dev_err(&vout->video_dev->dev,
+		ret = ipu_select_buffer(vout->post_proc_ch, IPU_INPUT_BUFFER,
+				vout->next_rdy_ipu_buf);
+	if (ret < 0) {
+		dev_err(&vout->video_dev->dev,
 				"unable to set IPU buffer ready\n");
-		}
+	}
 
-		/* Non IC split action */
-		if (!vout->pp_split)
-			vout->next_rdy_ipu_buf = !vout->next_rdy_ipu_buf;
+	/* Non IC split action */
+	if (!vout->pp_split)
+		vout->next_rdy_ipu_buf = !vout->next_rdy_ipu_buf;
 
-		/* Setup timer for next buffer */
-		index = peek_next_buf(&vout->ready_q);
+	/* Setup timer for next buffer */
+	index = peek_next_buf(&vout->ready_q);
 	if (index != -1)
 		setup_next_buf_timer(vout, index);
-			else
-			vout->state = STATE_STREAM_PAUSED;
+	else
+		vout->state = STATE_STREAM_PAUSED;
 
 	spin_unlock_irqrestore(&g_lock, lock_flags);
 
@@ -587,7 +587,7 @@ static irqreturn_t mxc_v4l2out_work_irq_handler(int irq, void *dev_id)
 
 			/* offset for next buffer's EBA */
 			pp_out_buf_offset = pp_out_buf_num ? vout->pp_right_stripe.output_column :
-												vout->pp_left_stripe.output_column;
+				vout->pp_left_stripe.output_column;
 			eba_offset = 0;
 			if (vout->cur_disp_output == 5) {
 				x_pos = (vout->crop_current.left / 8) * 8;
@@ -882,7 +882,7 @@ static int init_PP(ipu_channel_params_t *params, vout_data *vout,
 		x_pos = (vout->crop_current.left / 8) * 8;
 		y_pos = vout->crop_current.top;
 		eba_offset = (vout->xres*y_pos + x_pos) *
-						bytes_per_pixel(params->mem_pp_mem.out_pixel_fmt);
+				bytes_per_pixel(params->mem_pp_mem.out_pixel_fmt);
 	}
 
 	vout->bpp = fmt_to_bpp(params->mem_pp_mem.out_pixel_fmt);
@@ -939,12 +939,12 @@ static int init_PP(ipu_channel_params_t *params, vout_data *vout,
 				    params->mem_pp_mem.in_height,
 				    vout->v2f.fmt.pix.bytesperline /
 				    bytes_per_pixel(params->mem_pp_mem.
-									in_pixel_fmt),
-									IPU_ROTATE_NONE,
-									vout->v4l2_bufs[vout->ipu_buf[0]].m.offset,
-									vout->v4l2_bufs[vout->ipu_buf[1]].m.offset,
-									vout->offset.u_offset,
-									vout->offset.v_offset) != 0) {
+					    in_pixel_fmt),
+				    IPU_ROTATE_NONE,
+				    vout->v4l2_bufs[vout->ipu_buf[0]].m.offset,
+				    vout->v4l2_bufs[vout->ipu_buf[1]].m.offset,
+				    vout->offset.u_offset,
+				    vout->offset.v_offset) != 0) {
 		dev_err(dev, "Error initializing PP input buffer\n");
 		return -EINVAL;
 	}
@@ -1115,7 +1115,7 @@ static int mxc_v4l2out_streamon(vout_data * vout)
 			vout->pp_split = 1;
 			vout->ipu_buf[1] = vout->ipu_buf[0];
 			vout->frame_count = 1;
-	} else {
+		} else {
 			vout->ipu_buf[1] = dequeue_buf(&vout->ready_q);
 			vout->frame_count = 2;
 		}
@@ -1336,8 +1336,8 @@ static int mxc_v4l2out_streamon(vout_data * vout)
 		fb_set_var(fbi, &fbvar);
 
 		if (fbi->fbops->fb_ioctl && vout->display_ch == MEM_FG_SYNC) {
-		fb_pos.x = vout->crop_current.left;
-		fb_pos.y = vout->crop_current.top;
+			fb_pos.x = vout->crop_current.left;
+			fb_pos.y = vout->crop_current.top;
 			old_fs = get_fs();
 			set_fs(KERNEL_DS);
 			fbi->fbops->fb_ioctl(fbi, MXCFB_SET_OVERLAY_POS,
@@ -1357,8 +1357,8 @@ static int mxc_v4l2out_streamon(vout_data * vout)
 			for (i = 0; i < (fbi->fix.line_length * fbi->var.yres_virtual)/2; i++, tmp++)
 				*tmp = 0x80;
 		} else
-		memset(fbi->screen_base, 0x10,
-				fbi->fix.line_length * fbi->var.yres_virtual);
+			memset(fbi->screen_base, 0x10,
+					fbi->fix.line_length * fbi->var.yres_virtual);
 
 		if (INTERLACED_CONTENT(vout))
 			vout->post_proc_ch = MEM_VDI_PRP_VF_MEM;

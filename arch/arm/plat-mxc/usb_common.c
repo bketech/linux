@@ -574,7 +574,7 @@ int fsl_usb_host_init(struct platform_device *pdev)
 				gpio_usbh2_setback_stp();
 # endif
 			}
-			}
+		}
 #else
 		if (!strcmp("Host 2", pdata->name) && is_ivlboard()) {
 			usbh_mx35_set_ulpi_xcvr();
@@ -731,9 +731,9 @@ int fsl_usb_xcvr_suspend(struct fsl_xcvr_ops *xcvr_ops)
 
 		if (strcmp(xcvr_ops->name, "usb3315") == 0) {
 			if (gpio_usbh2_active())
-			return -EINVAL;
+				return -EINVAL;
 
-		clk_enable(usb_clk);
+			clk_enable(usb_clk);
 			usbh2_set_ulpi_xcvr();
 			if (xcvr_ops->suspend)
 				xcvr_ops->suspend(xcvr_ops);
@@ -744,14 +744,14 @@ int fsl_usb_xcvr_suspend(struct fsl_xcvr_ops *xcvr_ops)
 				return -EINVAL;
 
 			clk_enable(usb_clk);
-		otg_set_ulpi_xcvr();
-		if (xcvr_ops->suspend)
-			/* suspend transceiver */
-			xcvr_ops->suspend(xcvr_ops);
+			otg_set_ulpi_xcvr();
+			if (xcvr_ops->suspend)
+				/* suspend transceiver */
+				xcvr_ops->suspend(xcvr_ops);
 
-		gpio_usbotg_hs_inactive();
-		clk_disable(usb_clk);
-	}
+			gpio_usbotg_hs_inactive();
+			clk_disable(usb_clk);
+		}
 	}
 	return 0;
 }

@@ -1160,7 +1160,7 @@ static struct ubifs_znode *dirty_cow_bottom_up(struct ubifs_info *c,
  *     is returned and slot number of the matched branch is stored in @n;
  *   o not exact match, which means that zero-level znode does not contain
  *     @key, then %0 is returned and slot number of the closest branch is stored
- *     in  @n;
+ *     in @n;
  *   o @key is so small that it is even less than the lowest key of the
  *     leftmost zero-level node, then %0 is returned and %0 is stored in @n.
  *
