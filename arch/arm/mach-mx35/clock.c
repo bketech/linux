@@ -1917,8 +1917,20 @@ int __init mx35_clocks_init(void)
 	/* PCB0417 has a 22 MHz audio crystal.  Early versions of PCB0423 also have
 	 * it, but required it to be swapped for the 16 MHz crystal.
 	 */
-	if (ivl_board_revision == IVL_PCB0417_A)
+	if (ivl_cpuboard_revision == IVL_PCB0417_A)
 		ckie_clk.rate = 22579200;
+
+	/* Bump up NFC clock based on hardware */
+	#ifdef CONFIG_BOARD_BEAT_THANG
+	// Set nfc_clk divisor to div-by-5 (Set to 4)
+	__raw_writel(__raw_readl(MXC_CCM_PDR4) & (~MXC_CCM_PDR4_NFC_PODF_MASK) | 
+				(4 << MXC_CCM_PDR4_NFC_PODF_OFFSET), MXC_CCM_PDR4);
+	#endif
+	#ifdef CONFIG_BOARD_DJS_202
+	// Set nfc_clk divisor to div-by-4 (Set to 3)
+	__raw_writel(__raw_readl(MXC_CCM_PDR4) & (~MXC_CCM_PDR4_NFC_PODF_MASK) | 
+				(3 << MXC_CCM_PDR4_NFC_PODF_OFFSET), MXC_CCM_PDR4);
+	#endif
 
 	/* This will propagate to all children and init all the clock rates */
 	propagate_rate(&ckih_clk);

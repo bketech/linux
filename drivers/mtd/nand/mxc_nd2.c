@@ -143,6 +143,14 @@ static void nfc_memcpy(void *dest, void *src, int len)
 		BUG();
 }
 
+static void nfc_memcpy2(void *dest, void *src, int len)
+{
+	memcpy(dest, src, len);
+	if(len&1)
+		BUG();
+}
+
+
 /*
  * Functions to transfer data to/from spare erea.
  */
@@ -185,6 +193,7 @@ copy_spare(struct mtd_info *mtd, void *pbuf, void *pspare, int len, bool bfrom)
  */
 static void wait_op_done(int maxRetries, bool useirq)
 {
+	int cskip=0;
 	if (useirq) {
 		if ((raw_read(REG_NFC_OPS_STAT) & NFC_OPS_STAT) == 0) {
 			/* enable interrupt */
@@ -213,7 +222,9 @@ static void wait_op_done(int maxRetries, bool useirq)
 						 REG_NFC_OPS_STAT);
 				break;
 			}
-			udelay(1);
+			cskip++;
+			if(cskip > 20)
+				udelay(1);
 			if (maxRetries <= 0) {
 				printk(KERN_WARNING "%s(%d): INT not set\n",
 						__func__, __LINE__);
@@ -635,7 +646,7 @@ static void mxc_nand_read_buf(struct mtd_info *mtd, u_char * buf, int len)
 			}
 		} else {
 			col -= mtd->writesize;
-			memcpy(buf, &oob_buf[col], len);
+			memcpy(buf, &oob_buf[col], n);
 		}
 
 		/* update */
@@ -825,18 +836,18 @@ static void mxc_do_addr_cycle(struct mtd_info *mtd, int column, int page_addr)
 	u32 page_mask = g_page_mask;
 
 	if (column != -1) {
-		send_addr(column & 0xFF, true);
+		send_addr(column & 0xFF, false);
 		if (IS_2K_PAGE_NAND) {
 			/* another col addr cycle for 2k page */
-			send_addr((column >> 8) & 0xF, true);
+			send_addr((column >> 8) & 0xF, false);
 		} else if (IS_4K_PAGE_NAND) {
 			/* another col addr cycle for 4k page */
-			send_addr((column >> 8) & 0x1F, true);
+			send_addr((column >> 8) & 0x1F, false);
 		}
 	}
 	if (page_addr != -1) {
 		do {
-			send_addr((page_addr & 0xff), true);
+			send_addr((page_addr & 0xff), false);
 			page_mask >>= 8;
 			page_addr >>= 8;
 		} while (page_mask != 0);
@@ -877,6 +888,7 @@ static void mxc_nand_command(struct mtd_info *mtd, unsigned command,
 
 	case NAND_CMD_READ0:
 		g_nandfc_info.colAddr = column;
+		useirq = false;
 		break;
 
 	case NAND_CMD_READOOB:
@@ -955,8 +967,8 @@ static void mxc_nand_command(struct mtd_info *mtd, unsigned command,
 	case NAND_CMD_READOOB:
 	case NAND_CMD_READ0:
 		if (IS_LARGE_PAGE_NAND) {
-			/* send read confirm command */
-			send_cmd(mtd, NAND_CMD_READSTART, true);
+			/* send read confirm command - poll it, it's comparable time to context switch */
+			send_cmd(mtd, NAND_CMD_READSTART, false);
 			/* read for each AREA */
 			READ_PAGE();
 		} else {
@@ -975,7 +987,7 @@ static void mxc_nand_command(struct mtd_info *mtd, unsigned command,
 		 * byte alignment, so we can use
 		 * memcpy safely
 		 */
-		nfc_memcpy(data_buf, MAIN_AREA0, mtd->writesize);
+		nfc_memcpy2(data_buf, MAIN_AREA0, mtd->writesize);
 		copy_spare(mtd, oob_buf, SPARE_AREA0, mtd->oobsize, true);
 #endif
 
