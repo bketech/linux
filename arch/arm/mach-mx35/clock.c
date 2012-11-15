@@ -1917,7 +1917,7 @@ int __init mx35_clocks_init(void)
 	/* PCB0417 has a 22 MHz audio crystal.  Early versions of PCB0423 also have
 	 * it, but required it to be swapped for the 16 MHz crystal.
 	 */
-	if (ivl_cpuboard_revision == IVL_PCB0417_A)
+	if (ivl_board_revision == IVL_PCB0417_A)
 		ckie_clk.rate = 22579200;
 
 	/* Bump up NFC clock based on hardware */
