@@ -177,6 +177,17 @@ static ssize_t lcd_signals_disable_store(struct device_driver *dev, const char *
 static DRIVER_ATTR(lcd_signals_disable, S_IRUGO | S_IWUGO, lcd_signals_disable_show,
 		lcd_signals_disable_store);
 
+static void lcd_wait_for_spi(int us)
+{
+	long i;
+
+	for(i=0;i<5000*us;i++) {
+		if((__raw_readl(IO_ADDRESS(CSPI_BASE_ADDRESS + CSPI_CONREG)) & 4) == 0) 
+			break;
+	}
+	/* printk("LCD: Waited for SPI: %ld\n",i); */
+}
+
 /*
  * The screen is physically upside down and we must send it a command to flip
  * it the right way.  Because ESD can cause the screen to lose its state,
@@ -188,6 +199,7 @@ static DRIVER_ATTR(lcd_signals_disable, S_IRUGO | S_IWUGO, lcd_signals_disable_s
  */
 static void lcd_rotate_screen(struct work_struct *work)
 {
+	static int first=1;
 #if 0
 	/* This code would cause us to wait for a VSYNC, in case there are
 	 * noticeable artifacts from setting the screen like this.  Not tested.
@@ -241,6 +253,27 @@ static void lcd_rotate_screen(struct work_struct *work)
 
 	/* Set XCH bit to start transfer */
 	__raw_writel (0x01741077, IO_ADDRESS(CSPI_BASE_ADDRESS + CSPI_CONREG));
+	if(first) {
+		first = 0;
+		lcd_wait_for_spi(20);  // Let command finish
+		// Select register 04h, start transfer
+		__raw_writel (0x00700004, IO_ADDRESS(CSPI_BASE_ADDRESS + CSPI_TXDATA));
+		__raw_writel (0x01741077, IO_ADDRESS(CSPI_BASE_ADDRESS + CSPI_CONREG));
+		// Let transfer finish (Again, the crude way - refined is to wait on bit 2)
+		// Not sure why this is needed, but if this isn't here, we write to register 1 instead.
+		lcd_wait_for_spi(10);
+		/* Set the SEL bits to 0, with attendant reset values on OEA (01).  See HX8238A datasheet.
+		 * 7 = 0111 = start pattern
+		 * 2 = 00 10 = start pattern cont, write data
+		 * 0 = Not used
+		 * 4 = PALM=1, BLT[1:0] = 0
+		 * 4 = OEA[1:0] = 01, SEL[2:1] = 00
+		 * 0 = SEL[0] = 0, SWD[2:1] = 000
+		 * This should be default if SEL and SWD pins are all 0.
+		 */
+		__raw_writel (0x00720440, IO_ADDRESS(CSPI_BASE_ADDRESS + CSPI_TXDATA));
+		__raw_writel (0x01741077, IO_ADDRESS(CSPI_BASE_ADDRESS + CSPI_CONREG));
+	}
 
 	/* Because we are repeating the message, we don't need to wait for it.
 	 * If you want to check, the appropriate method is to wait for XCH=0.
