@@ -28,10 +28,25 @@ config LOGO_LINUX_CLUT224
 	default y
 
 config LOGO_BKE_CLUT224
-	bool "Beat Kangz Electronics 224-color logo"
+	bool "BKE, LLC Black and white 224-color logo"
+	depends on BOARD_BEAT_THANG
+	default n
+
+config LOGO_BKE_TCATS_CLUT224
+	bool "BKE, LLC Thundercats 224-color logo"
+	depends on BOARD_BEAT_THANG
+	default n
+	
+config LOGO_BKE_GRADIENT_CLUT224
+	bool "BKE, LLC Blue Gradient 224-color logo"
 	depends on BOARD_BEAT_THANG
 	default y
 
+config LOGO_BKE_KANGZ_CLUT224
+	bool "BKE, LLC Beat Kangz 224-color logo"
+	depends on BOARD_BEAT_THANG
+	default n
+	
 config LOGO_STANTON_CLUT224
 	bool "Stanton 224-color logo"
 	depends on BOARD_SASQUATCH
