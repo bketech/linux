@@ -93,7 +93,7 @@ static inline struct f_midi *func_to_midi(struct usb_function *f)
 
 static void f_midi_transmit(struct f_midi *midi, struct usb_request *req);
 
-DECLARE_UAC_AC_HEADER_DESCRIPTOR(1);
+DECLARE_USB_AC_HEADER_DESCRIPTOR(1);
 DECLARE_USB_MIDI_OUT_JACK_DESCRIPTOR(1);
 DECLARE_USB_MS_ENDPOINT_DESCRIPTOR(16);
 
@@ -109,12 +109,12 @@ static struct usb_interface_descriptor ac_interface_desc __initdata = {
 };
 
 /* B.3.2  Class-Specific AC Interface Descriptor */
-static struct uac1_ac_header_descriptor_1 ac_header_desc __initdata = {
-	.bLength =		UAC_DT_AC_HEADER_SIZE(1),
+static struct usb_ac_header_descriptor_1 ac_header_desc __initdata = {
+	.bLength =		USB_DT_AC_HEADER_SIZE(1),
 	.bDescriptorType =	USB_DT_CS_INTERFACE,
 	.bDescriptorSubtype =	USB_MS_HEADER,
 	.bcdADC =		cpu_to_le16(0x0100),
-	.wTotalLength =		cpu_to_le16(UAC_DT_AC_HEADER_SIZE(1)),
+	.wTotalLength =		cpu_to_le16(USB_DT_AC_HEADER_SIZE(1)),
 	.bInCollection =	1,
 	/* .baInterfaceNr =	DYNAMIC */
 };
