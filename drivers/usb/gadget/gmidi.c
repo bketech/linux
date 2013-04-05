@@ -189,6 +189,7 @@ static struct usb_composite_driver midi_driver = {
 	.dev		= &device_desc,
 	.strings	= dev_strings,
 	// FIXME: .max_speed	= USB_SPEED_HIGH,
+	.bind    = midi_bind,
 	.unbind		= __exit_p(midi_unbind),
 };
 
