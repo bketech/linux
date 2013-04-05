@@ -176,7 +176,7 @@ static int __init midi_bind(struct usb_composite_dev *cdev)
 		device_desc.bcdDevice = cpu_to_le16(0x0200 + gcnum);
 	}
 
-	status = usb_add_config(cdev, &midi_config, midi_bind_config);
+	status = usb_add_config(cdev, &midi_config); // FIXME: , midi_bind_config);
 	if (status < 0)
 		return status;
 
@@ -188,13 +188,14 @@ static struct usb_composite_driver midi_driver = {
 	.name		= (char *) longname,
 	.dev		= &device_desc,
 	.strings	= dev_strings,
-	.max_speed	= USB_SPEED_HIGH,
+	// FIXME: .max_speed	= USB_SPEED_HIGH,
 	.unbind		= __exit_p(midi_unbind),
 };
 
 static int __init midi_init(void)
 {
-	return usb_composite_probe(&midi_driver, midi_bind);
+	// FIXME: ??? return usb_composite_probe(&midi_driver, midi_bind);
+	return usb_composite_register(&midi_driver);
 }
 module_init(midi_init);
 

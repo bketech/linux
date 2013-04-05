@@ -304,21 +304,22 @@ f_midi_complete(struct usb_ep *ep, struct usb_request *req)
 
 static int f_midi_start_ep(struct f_midi *midi,
 			   struct usb_function *f,
-			   struct usb_ep *ep)
+			   struct usb_ep *ep,
+			   struct usb_endpoint_descriptor *desc)
 {
 	int err;
 	struct usb_composite_dev *cdev = f->config->cdev;
 
 	if (ep->driver_data)
 		usb_ep_disable(ep);
-
+#if 0
 	err = config_ep_by_speed(midi->gadget, f, ep);
 	if (err) {
 		ERROR(cdev, "can't configure %s: %d\n", ep->name, err);
 		return err;
 	}
-
-	err = usb_ep_enable(ep);
+#endif
+	err = usb_ep_enable(ep, desc);
 	if (err) {
 		ERROR(cdev, "can't start %s: %d\n", ep->name, err);
 		return err;
@@ -336,25 +337,25 @@ static int f_midi_set_alt(struct usb_function *f, unsigned intf, unsigned alt)
 	unsigned i;
 	int err;
 
-	err = f_midi_start_ep(midi, f, midi->in_ep);
+	err = f_midi_start_ep(midi, f, midi->in_ep, &bulk_in_desc);
 	if (err)
 		return err;
 
-	err = f_midi_start_ep(midi, f, midi->out_ep);
+	err = f_midi_start_ep(midi, f, midi->out_ep, &bulk_out_desc);
 	if (err)
 		return err;
 
 	if (midi->out_ep->driver_data)
 		usb_ep_disable(midi->out_ep);
-
+#if 0
 	err = config_ep_by_speed(midi->gadget, f, midi->out_ep);
 	if (err) {
 		ERROR(cdev, "can't configure %s: %d\n",
 		      midi->out_ep->name, err);
 		return err;
 	}
-
-	err = usb_ep_enable(midi->out_ep);
+#endif
+	err = usb_ep_enable(midi->out_ep, &bulk_out_desc);
 	if (err) {
 		ERROR(cdev, "can't start %s: %d\n",
 		      midi->out_ep->name, err);
