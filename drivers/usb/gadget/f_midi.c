@@ -33,8 +33,10 @@
 #include <linux/usb/audio.h>
 #include <linux/usb/midi.h>
 
+#if 0
 MODULE_AUTHOR("Ben Williamson");
 MODULE_LICENSE("GPL v2");
+#endif
 
 static const char f_midi_shortname[] = "f_midi";
 static const char f_midi_longname[] = "MIDI Gadget";
