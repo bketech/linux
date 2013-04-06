@@ -718,7 +718,8 @@ static int f_midi_register_card(struct f_midi *midi)
 
 	/* Set up rawmidi */
 	snd_component_add(card, "MIDI");
-	err = snd_rawmidi_new(card, card->longname, 0,
+	printk ("f_midi: creating rawmidi: %s ins: %i outs: %i\n", card->longname, midi->in_ports, midi->out_ports);
+	err = snd_rawmidi_new(card, card->longname, midi->index,
 			      midi->out_ports, midi->in_ports, &rmidi);
 	if (err < 0) {
 		ERROR(midi, "snd_rawmidi_new() failed: error %d\n", err);
@@ -834,6 +835,7 @@ f_midi_bind(struct usb_configuration *c, struct usb_function *f)
 
 	/* configure the external IN jacks, each linked to an embedded OUT jack */
 	for (n = 0; n < midi->in_ports; n++) {
+
 		struct usb_midi_in_jack_descriptor *in_ext = &jack_in_ext_desc[n];
 		struct usb_midi_out_jack_descriptor_1 *out_emb = &jack_out_emb_desc[n];
 
@@ -862,6 +864,7 @@ f_midi_bind(struct usb_configuration *c, struct usb_function *f)
 
 	/* configure the external OUT jacks, each linked to an embedded IN jack */
 	for (n = 0; n < midi->out_ports; n++) {
+
 		struct usb_midi_in_jack_descriptor *in_emb = &jack_in_emb_desc[n];
 		struct usb_midi_out_jack_descriptor_1 *out_ext = &jack_out_ext_desc[n];
 
@@ -944,12 +947,7 @@ fail:
  *
  * Returns zero on success, else negative errno.
  */
-int __init f_midi_bind_config(struct usb_configuration *c,
-			      int index, char *id,
-			      unsigned int in_ports,
-			      unsigned int out_ports,
-			      unsigned int buflen,
-			      unsigned int qlen)
+int __init f_midi_bind_config(struct usb_configuration *c)
 {
 	struct f_midi *midi;
 	int status, i;
@@ -1003,7 +1001,16 @@ int __init f_midi_bind_config(struct usb_configuration *c,
 	status = usb_add_function(c, &midi->func);
 	if (status)
 		goto setup_fail;
-
+#if 0
+	printk("f_midi:\n");
+	printk("\tindex: %i\n", midi->index);
+	printk("\tid: %s\n", midi->id);
+	printk("\tin_ports: %i\n", midi->in_ports);
+	printk("\tout_ports: %i\n", midi->out_ports);
+	printk("\tbuflen: %i\n", midi->buflen);
+	printk("\tqlen: %i\n", midi->qlen);
+#endif
+	
 	return 0;
 
 setup_fail:

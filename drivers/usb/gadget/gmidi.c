@@ -101,14 +101,12 @@ static int __exit midi_unbind(struct usb_composite_dev *dev)
 static int
 midi_setup(struct usb_configuration *c, const struct usb_ctrlrequest *ctrl)
 {
-   return 0;
+	return 0;
 }
 
 static int __init midi_bind_config(struct usb_configuration *c)
 {
-	return f_midi_bind_config(c, index, id,
-				  in_ports, out_ports,
-				  buflen, qlen);
+	return f_midi_bind_config(c);
 }
 
 static struct usb_configuration midi_config = {
