@@ -45,35 +45,10 @@
 
 /*-------------------------------------------------------------------------*/
 
-MODULE_AUTHOR("Ben Williamson");
-MODULE_LICENSE("GPL v2");
+#define DRIVER_DESC		"Linux USB MIDI Gadget"
 
 static const char shortname[] = "g_midi";
 static const char longname[] = "MIDI Gadget";
-
-static int index = SNDRV_DEFAULT_IDX1;
-module_param(index, int, S_IRUGO);
-MODULE_PARM_DESC(index, "Index value for the USB MIDI Gadget adapter.");
-
-static char *id = SNDRV_DEFAULT_STR1;
-module_param(id, charp, S_IRUGO);
-MODULE_PARM_DESC(id, "ID string for the USB MIDI Gadget adapter.");
-
-static unsigned int buflen = 256;
-module_param(buflen, uint, S_IRUGO);
-MODULE_PARM_DESC(buflen, "MIDI buffer length");
-
-static unsigned int qlen = 32;
-module_param(qlen, uint, S_IRUGO);
-MODULE_PARM_DESC(qlen, "USB read request queue length");
-
-static unsigned int in_ports = 1;
-module_param(in_ports, uint, S_IRUGO);
-MODULE_PARM_DESC(in_ports, "Number of MIDI input ports");
-
-static unsigned int out_ports = 1;
-module_param(out_ports, uint, S_IRUGO);
-MODULE_PARM_DESC(out_ports, "Number of MIDI output ports");
 
 /* Thanks to Grey Innovation for donating this product ID.
  *
@@ -192,6 +167,10 @@ static struct usb_composite_driver midi_driver = {
 	.bind    = midi_bind,
 	.unbind		= __exit_p(midi_unbind),
 };
+
+MODULE_DESCRIPTION(DRIVER_DESC);
+MODULE_AUTHOR("Ben Williamson");
+MODULE_LICENSE("GPL v2");
 
 static int __init midi_init(void)
 {
