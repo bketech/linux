@@ -45,7 +45,7 @@
 
 /*-------------------------------------------------------------------------*/
 
-#define DRIVER_DESC		"Linux USB MIDI Gadget"
+#define DRIVER_DESC		"MIDI Gadget"
 
 static const char shortname[] = "g_midi";
 static const char longname[] = "MIDI Gadget";
@@ -98,13 +98,11 @@ static int __exit midi_unbind(struct usb_composite_dev *dev)
 	return 0;
 }
 
-static struct usb_configuration midi_config = {
-	.label		= "MIDI Gadget",
-	.bConfigurationValue = 1,
-	/* .iConfiguration = DYNAMIC */
-	.bmAttributes	= USB_CONFIG_ATT_ONE,
-	.bMaxPower	= CONFIG_USB_GADGET_VBUS_DRAW / 2,
-};
+static int
+midi_setup(struct usb_configuration *c, const struct usb_ctrlrequest *ctrl)
+{
+   return 0;
+}
 
 static int __init midi_bind_config(struct usb_configuration *c)
 {
@@ -112,6 +110,17 @@ static int __init midi_bind_config(struct usb_configuration *c)
 				  in_ports, out_ports,
 				  buflen, qlen);
 }
+
+static struct usb_configuration midi_config = {
+	.label		= "MIDI Gadget",
+	.bind       = midi_bind_config,
+	.setup      = ,
+	.bConfigurationValue = 1,
+	/* .iConfiguration = DYNAMIC */
+	.bmAttributes	= USB_CONFIG_ATT_ONE,
+	.bMaxPower	= CONFIG_USB_GADGET_VBUS_DRAW / 2,
+};
+
 
 static int __init midi_bind(struct usb_composite_dev *cdev)
 {
@@ -160,7 +169,7 @@ static int __init midi_bind(struct usb_composite_dev *cdev)
 }
 
 static struct usb_composite_driver midi_driver = {
-	.name		= (char *) longname,
+	.name		= "g_midi",
 	.dev		= &device_desc,
 	.strings	= dev_strings,
 	// FIXME: .max_speed	= USB_SPEED_HIGH,
