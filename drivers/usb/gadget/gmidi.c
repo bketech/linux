@@ -114,7 +114,7 @@ static int __init midi_bind_config(struct usb_configuration *c)
 static struct usb_configuration midi_config = {
 	.label		= "MIDI Gadget",
 	.bind       = midi_bind_config,
-	.setup      = ,
+	.setup      = midi_setup,
 	.bConfigurationValue = 1,
 	/* .iConfiguration = DYNAMIC */
 	.bmAttributes	= USB_CONFIG_ATT_ONE,
