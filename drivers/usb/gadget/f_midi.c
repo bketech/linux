@@ -335,6 +335,7 @@ static int f_midi_start_ep(struct f_midi *midi,
 	if (ep->driver_data)
 		usb_ep_disable(ep);
 #if 0
+   /* This seems to not be needed in legacy kernels around v2.28 */
 	err = config_ep_by_speed(midi->gadget, f, ep);
 	if (err) {
 		ERROR(cdev, "can't configure %s: %d\n", ep->name, err);
@@ -370,6 +371,7 @@ static int f_midi_set_alt(struct usb_function *f, unsigned intf, unsigned alt)
 	if (midi->out_ep->driver_data)
 		usb_ep_disable(midi->out_ep);
 #if 0
+   /* This does not seem to be needed in legacy kernels */
 	err = config_ep_by_speed(midi->gadget, f, midi->out_ep);
 	if (err) {
 		ERROR(cdev, "can't configure %s: %d\n",
@@ -697,7 +699,6 @@ static int f_midi_register_card(struct f_midi *midi)
 		.dev_free = f_midi_snd_free,
 	};
 
-//	err = snd_card_create(midi->index, midi->id, THIS_MODULE, 0, &card);
 	err = snd_card_create(index, id, THIS_MODULE, 0, &card);
 	if (err < 0) {
 		ERROR(midi, "snd_card_create() failed\n");

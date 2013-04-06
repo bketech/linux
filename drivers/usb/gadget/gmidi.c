@@ -121,7 +121,6 @@ static struct usb_configuration midi_config = {
 	.bMaxPower	= CONFIG_USB_GADGET_VBUS_DRAW / 2,
 };
 
-
 static int __init midi_bind(struct usb_composite_dev *cdev)
 {
 	struct usb_gadget *gadget = cdev->gadget;
@@ -160,7 +159,7 @@ static int __init midi_bind(struct usb_composite_dev *cdev)
 		device_desc.bcdDevice = cpu_to_le16(0x0200 + gcnum);
 	}
 
-	status = usb_add_config(cdev, &midi_config); // FIXME: , midi_bind_config);
+	status = usb_add_config(cdev, &midi_config);
 	if (status < 0)
 		return status;
 
@@ -172,9 +171,8 @@ static struct usb_composite_driver midi_driver = {
 	.name		= "g_midi",
 	.dev		= &device_desc,
 	.strings	= dev_strings,
-	// FIXME: .max_speed	= USB_SPEED_HIGH,
 	.bind    = midi_bind,
-	.unbind		= __exit_p(midi_unbind),
+	.unbind	= __exit_p(midi_unbind),
 };
 
 MODULE_DESCRIPTION(DRIVER_DESC);
@@ -183,7 +181,6 @@ MODULE_LICENSE("GPL v2");
 
 static int __init midi_init(void)
 {
-	// FIXME: ??? return usb_composite_probe(&midi_driver, midi_bind);
 	return usb_composite_register(&midi_driver);
 }
 module_init(midi_init);
