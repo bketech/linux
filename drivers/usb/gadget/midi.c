@@ -171,8 +171,8 @@ static struct usb_composite_driver midi_driver = {
 	.name		= "g_midi",
 	.dev		= &device_desc,
 	.strings	= dev_strings,
-	.bind    = midi_bind,
-	.unbind	= __exit_p(midi_unbind),
+	.bind		= midi_bind,
+	.unbind		= __exit_p(midi_unbind),
 };
 
 MODULE_DESCRIPTION(DRIVER_DESC);
