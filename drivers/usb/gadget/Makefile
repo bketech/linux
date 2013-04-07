@@ -33,13 +33,13 @@ obj-$(CONFIG_USB_ARC)		+= arcotg_udc.o
 # USB gadget drivers
 #
 g_zero-objs			:= zero.o
-g_audio-objs			:= audio.o
-g_ether-objs			:= ether.o
-g_serial-objs			:= serial.o
-g_midi-objs			:= gmidi.o
-gadgetfs-objs			:= inode.o
-g_file_storage-objs		:= file_storage.o
-g_printer-objs			:= printer.o
+g_audio-objs		:= audio.o
+g_ether-objs		:= ether.o
+g_serial-objs		:= serial.o
+g_midi-objs			:= midi.o
+gadgetfs-objs		:= inode.o
+g_file_storage-objs	:= file_storage.o
+g_printer-objs		:= printer.o
 g_cdc-objs			:= cdc2.o
 
 obj-$(CONFIG_USB_ZERO)		+= g_zero.o
