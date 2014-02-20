@@ -1,13 +1,14 @@
 # Makefile for the Linux logos
 
-obj-$(CONFIG_LOGO)			         += logo.o
-obj-$(CONFIG_LOGO_LINUX_MONO)		   += logo_linux_mono.o
-obj-$(CONFIG_LOGO_LINUX_VGA16)		+= logo_linux_vga16.o
-obj-$(CONFIG_LOGO_LINUX_CLUT224)	   += logo_linux_clut224.o
-obj-$(CONFIG_LOGO_BKE_CLUT224)		+= logo_bke_clut224.o
-obj-$(CONFIG_LOGO_BKE_TCATS_CLUT224)		+= logo_bke_tcats_clut224.o
+obj-$(CONFIG_LOGO)			 	        += logo.o
+obj-$(CONFIG_LOGO_LINUX_MONO)			+= logo_linux_mono.o
+obj-$(CONFIG_LOGO_LINUX_VGA16)			+= logo_linux_vga16.o
+obj-$(CONFIG_LOGO_LINUX_CLUT224)		+= logo_linux_clut224.o
+obj-$(CONFIG_LOGO_BKE_CLUT224)			+= logo_bke_clut224.o
+obj-$(CONFIG_LOGO_BKE_TCATS_CLUT224)	+= logo_bke_tcats_clut224.o
 obj-$(CONFIG_LOGO_BKE_GRADIENT_CLUT224)	+= logo_bke_gradient_clut224.o
-obj-$(CONFIG_LOGO_BKE_KANGZ_CLUT224)		+= logo_bke_kangz_clut224.o
+obj-$(CONFIG_LOGO_BKE_KANGZ_CLUT224)	+= logo_bke_kangz_clut224.o
+obj-$(CONFIG_LOGO_BRIAN_CLUT224)		+= logo_brian_clut224.o
 obj-$(CONFIG_LOGO_STANTON_CLUT224)	+= logo_stanton_clut224.o
 obj-$(CONFIG_LOGO_BLACKFIN_CLUT224)	+= logo_blackfin_clut224.o
 obj-$(CONFIG_LOGO_BLACKFIN_VGA16)	+= logo_blackfin_vga16.o

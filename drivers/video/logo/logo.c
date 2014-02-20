@@ -104,13 +104,16 @@ const struct linux_logo * __init_refok fb_find_logo(int depth)
 		logo = &logo_bke_clut224;
 #endif
 #ifdef CONFIG_LOGO_BKE_TCATS_CLUT224
-      logo = &logo_bke_tcats_clut224;
+		logo = &logo_bke_tcats_clut224;
 #endif
 #ifdef CONFIG_LOGO_BKE_GRADIENT_CLUT224
-      logo = &logo_bke_gradient_clut224;
+		logo = &logo_bke_gradient_clut224;
 #endif
 #ifdef CONFIG_LOGO_BKE_KANGZ_CLUT224
-      logo = &logo_bke_kangz_clut224;
+		logo = &logo_bke_kangz_clut224;
+#endif
+#ifdef CONFIG_LOGO_BRIAN_CLUT224
+		logo = &logo_brian_clut224;
 #endif
 #ifdef CONFIG_LOGO_STANTON_CLUT224
 		logo = &logo_stanton_clut224;

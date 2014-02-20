@@ -46,7 +46,12 @@ config LOGO_BKE_KANGZ_CLUT224
 	bool "BKE, LLC Beat Kangz 224-color logo"
 	depends on BOARD_BEAT_THANG
 	default n
-	
+
+config LOGO_BRIAN_CLUT224
+	bool "Brian Tennyson's 224-color logo"
+	depends on BOARD_BEAT_THANG
+	default n
+
 config LOGO_STANTON_CLUT224
 	bool "Stanton 224-color logo"
 	depends on BOARD_SASQUATCH
